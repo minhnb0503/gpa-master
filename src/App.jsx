@@ -11,12 +11,23 @@ const defaultSubjects = [
 
 const quotes = [
   "Bé iu của anh ơi, cố lên nhé! Anh luôn ở đây ủng hộ Ly. ❤️",
-  "Gửi ngàn nụ hôn cho cô gái NEU giỏi giang của anh. Yêu Ly nhất!",
-  "Học xong anh dẫn đi ăn đồ Hàn nhé, Ly của anh vất vả rồi 🥰",
-  "GPA NEU khó thế nào cũng không làm khó được em bé của anh đâu!",
-  "Ly cứ việc học giỏi, cả thế giới cứ để anh lo. Thương em lắm!",
-  "Nhìn Ly chăm chỉ mà anh thấy yêu quá, cố lên nốt môn này nha!"
+  "Gửi ngàn nụ hôn cho cô gái NEU giỏi giang của anh. Yêu Ly nhất! 🥰",
+  "Học xong anh dẫn đi ăn đồ Hàn nhé, Ly của anh vất vả rồi 🍲",
+  "GPA NEU khó thế nào cũng không làm khó được em bé của anh đâu! 🚀",
+  "Ly cứ việc học giỏi, cả thế giới cứ để anh lo. Thương em lắm! 🥺",
+  "Nhìn Ly chăm chỉ mà anh thấy yêu quá, cố lên nốt môn này nha! ✨"
 ];
+
+// Bảng quy đổi điểm chữ NEU sang điểm số hệ 10 tối thiểu cần đạt
+const gradeScale = {
+  'A': 8.5,
+  'B+': 8.0,
+  'B': 7.0,
+  'C+': 6.5,
+  'C': 5.5,
+  'D+': 5.0,
+  'D': 4.0
+};
 
 const convertTo4Scale = (score) => {
   if (score >= 8.5) return 4.0;
@@ -29,7 +40,6 @@ const convertTo4Scale = (score) => {
   return 0.0;
 };
 
-// Biểu đồ vòng tròn
 const CircularProgress = ({ value, mainText, subText, max, colorClass, trailColor = "text-slate-100" }) => {
   const radius = 40;
   const circumference = 2 * Math.PI * radius;
@@ -59,22 +69,17 @@ export default function App() {
   const [scores, setScores] = useState({});
   const [isLoaded, setIsLoaded] = useState(false);
   
-  // State cho hiệu ứng gõ chữ
   const [quote, setQuote] = useState("");
   const [displayedQuote, setDisplayedQuote] = useState("");
   const typingIndex = useRef(0);
 
-  // State cho Modal Xóa
   const [subjectToDelete, setSubjectToDelete] = useState(null);
-
-  // State cho Modal Thêm môn
   const [showAddModal, setShowAddModal] = useState(false);
   const [newSub, setNewSub] = useState({ name: '', credits: 3, attW: 10, midW: 40, finW: 50, hasFinal: true });
 
-  // Khôi phục dữ liệu
   useEffect(() => {
     try {
-      const savedData = localStorage.getItem('gpa-master-v9');
+      const savedData = localStorage.getItem('gpa-master-v10');
       if (savedData) {
         const parsed = JSON.parse(savedData);
         if (parsed.scores) setScores(parsed.scores);
@@ -84,28 +89,28 @@ export default function App() {
       console.error(e);
     }
     
-    // Chọn câu chúc ngẫu nhiên
     setQuote(quotes[Math.floor(Math.random() * quotes.length)]);
     setIsLoaded(true);
   }, []);
 
-  // Tự động lưu khi có thay đổi
   useEffect(() => {
     if (isLoaded) {
-      localStorage.setItem('gpa-master-v9', JSON.stringify({ scores, subjectsList }));
+      localStorage.setItem('gpa-master-v10', JSON.stringify({ scores, subjectsList }));
     }
   }, [scores, subjectsList, isLoaded]);
 
-  // Hiệu ứng gõ chữ (Typing Effect)
+  // ĐÃ FIX: Sử dụng Array.from() để không cắt ngang Emoji và dấu Tiếng Việt
   useEffect(() => {
     if (!quote) return;
     typingIndex.current = 0;
     setDisplayedQuote("");
     
+    const chars = Array.from(quote); 
+
     const interval = setInterval(() => {
       setDisplayedQuote((prev) => {
-        if (typingIndex.current < quote.length) {
-          const nextChar = quote[typingIndex.current];
+        if (typingIndex.current < chars.length) {
+          const nextChar = chars[typingIndex.current];
           typingIndex.current++;
           return prev + nextChar;
         } else {
@@ -113,23 +118,44 @@ export default function App() {
           return prev;
         }
       });
-    }, 60); // Tốc độ gõ: 60ms / ký tự
+    }, 50); 
 
     return () => clearInterval(interval);
   }, [quote]);
 
-  // Hàm update điểm & mục tiêu riêng
+  // Hàm update điểm thông minh, phân biệt điểm số và điểm chữ
   const updateScore = (id, field, val) => {
-    const cleanVal = val.replace(/[^0-9.]/g, '');
-    if ((cleanVal.match(/\./g) || []).length > 1) return;
+    let cleanVal = val;
+    
+    // Nếu nhập điểm số thì chặn ký tự lạ
+    if (['attendance', 'midterm', 'final'].includes(field)) {
+      cleanVal = val.replace(/[^0-9.]/g, '');
+      if ((cleanVal.match(/\./g) || []).length > 1) return;
+    } 
+    // Nếu chọn tự nhập số cho Mục tiêu thì cũng chặn ký tự lạ
+    else if (field === 'target' && scores[id]?.targetType === 'number') {
+      cleanVal = val.replace(/[^0-9.]/g, '');
+      if ((cleanVal.match(/\./g) || []).length > 1) return;
+    }
 
-    setScores(prev => ({
-      ...prev,
-      [id]: { ...(prev[id] || { attendance: '', midterm: '', final: '', target: '8.5' }), [field]: cleanVal }
-    }));
+    setScores(prev => {
+      const currentSubjectData = prev[id] || { attendance: '', midterm: '', final: '', target: 'A', targetType: 'letter' };
+      
+      // Nếu đổi chế độ sang 'Chữ', tự reset về A. Nếu sang 'Số', tự reset về '8.5'
+      if (field === 'targetType') {
+         return {
+           ...prev,
+           [id]: { ...currentSubjectData, targetType: cleanVal, target: cleanVal === 'letter' ? 'A' : '8.5' }
+         };
+      }
+
+      return {
+        ...prev,
+        [id]: { ...currentSubjectData, [field]: cleanVal }
+      };
+    });
   };
 
-  // Hàm xử lý Thêm môn học
   const handleAddSubject = () => {
     if (!newSub.name.trim()) {
       alert("Khánh Ly nhớ nhập tên môn học nhé!");
@@ -150,21 +176,18 @@ export default function App() {
     
     setSubjectsList([...subjectsList, newSubject]);
     setShowAddModal(false);
-    // Reset form
     setNewSub({ name: '', credits: 3, attW: 10, midW: 40, finW: 50, hasFinal: true });
   };
 
-  // Xử lý Xóa môn học
   const confirmDelete = () => {
     setSubjectsList(prev => prev.filter(s => s.id !== subjectToDelete.id));
     setSubjectToDelete(null);
   };
 
-  // Tính toán tổng điểm
   let totalCredits = 0, totalPoints = 0, completedSubjects = 0;
   
   subjectsList.forEach(sub => {
-    const s = scores[sub.id] || { attendance: '', midterm: '', final: '', target: '8.5' };
+    const s = scores[sub.id] || { attendance: '', midterm: '', final: '' };
     const att = parseFloat(s.attendance) || 0;
     const mid = parseFloat(s.midterm) || 0;
     const fin = parseFloat(s.final) || 0;
@@ -186,14 +209,12 @@ export default function App() {
     <div className="min-h-screen bg-[#f0f4f8] p-0 md:p-6 font-sans text-slate-800 flex justify-center relative">
       <div className="w-full max-w-[1280px] bg-white md:rounded-[24px] shadow-2xl flex flex-col md:flex-row h-screen md:h-[90vh] overflow-hidden border border-slate-200">
         
-        {/* Sidebar */}
         <div className="w-full md:w-[260px] bg-[#f8fafc] border-b md:border-b-0 md:border-r border-slate-200 p-6 flex flex-col shrink-0 relative z-10">
           <div className="flex items-center gap-3 mb-6 md:mb-8">
             <span className="text-[32px] drop-shadow-md">🚀</span>
             <h1 className="text-[22px] font-extrabold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent tracking-tight">GPA Master</h1>
           </div>
           
-          {/* Dashboard Panel Nhỏ */}
           <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col items-center mb-6">
             <h3 className="text-[14px] font-bold text-slate-500 mb-4 uppercase tracking-wider">Hiệu suất</h3>
             <div className="flex flex-col gap-4 w-full">
@@ -203,7 +224,6 @@ export default function App() {
             </div>
           </div>
 
-          {/* Lời nhắn yêu thương (Typing) */}
           <div className="mt-auto bg-gradient-to-br from-blue-500 to-cyan-400 rounded-2xl p-5 shadow-md text-white">
             <div className="flex items-center gap-2 mb-2 opacity-80">
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd"></path></svg>
@@ -216,7 +236,6 @@ export default function App() {
           </div>
         </div>
 
-        {/* Nội dung chính */}
         <div className="flex-1 flex flex-col h-full bg-[#f8fafc] relative z-10">
           <div className="flex justify-between items-center px-6 md:px-8 py-5 border-b border-slate-200 bg-white shadow-sm z-20">
             <h2 className="text-[20px] md:text-[24px] font-extrabold text-slate-800">Quản lý môn học</h2>
@@ -234,20 +253,23 @@ export default function App() {
               <div className="text-center py-20 text-slate-400 font-medium">Chưa có môn học nào, Ly thêm môn mới nhé!</div>
             ) : (
               subjectsList.map((subject) => {
-                const s = scores[subject.id] || { attendance: '', midterm: '', final: '', target: '8.5' };
+                const s = scores[subject.id] || { attendance: '', midterm: '', final: '' };
                 const att = parseFloat(s.attendance) || 0;
                 const mid = parseFloat(s.midterm) || 0;
-                const target = parseFloat(s.target) || 0;
+                
+                const targetType = s.targetType || 'letter';
+                let targetValue = s.target || 'A';
+                
+                // Quy đổi mục tiêu thành số hệ 10 để tính toán
+                let numTarget = targetType === 'letter' ? (gradeScale[targetValue] || 8.5) : (parseFloat(targetValue) || 0);
                 
                 let reqA = 0;
                 if (subject.hasFinal) {
-                  reqA = (target - (att * subject.weights.attendance) - (mid * subject.weights.midterm)) / subject.weights.final;
+                  reqA = (numTarget - (att * subject.weights.attendance) - (mid * subject.weights.midterm)) / subject.weights.final;
                 }
 
                 return (
                   <div key={subject.id} className="bg-white rounded-2xl p-5 md:p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow relative group">
-                    
-                    {/* Nút Xóa (Thùng rác) */}
                     <button 
                       onClick={() => setSubjectToDelete(subject)}
                       className="absolute top-4 right-4 p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
@@ -285,23 +307,54 @@ export default function App() {
                       )}
                     </div>
                     
-                    {/* Phần cấu hình Mục tiêu riêng */}
                     {subject.hasFinal && (
-                      <div className="mt-5 pt-4 border-t border-slate-100 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[13px] text-slate-500 font-bold">Mục tiêu:</span>
-                          <input 
-                            type="text" 
-                            inputMode="decimal" 
-                            value={s.target !== undefined ? s.target : '8.5'} 
-                            onChange={e => updateScore(subject.id, 'target', e.target.value)}
-                            title="Điểm mục tiêu của riêng môn này"
-                            className="w-[60px] bg-slate-50 border border-slate-300 rounded-lg px-2 py-1.5 text-[14px] font-bold text-slate-800 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white shadow-inner" 
-                          />
+                      <div className="mt-5 pt-4 border-t border-slate-100 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                        
+                        {/* Khu vực Chọn Mục Tiêu MỚI */}
+                        <div className="flex items-center gap-2 bg-slate-50 p-1.5 rounded-lg border border-slate-200">
+                          <span className="text-[12px] text-slate-500 font-bold ml-1">Mục tiêu:</span>
+                          
+                          {/* Công tắc Chữ / Số */}
+                          <div className="flex bg-slate-200/50 rounded p-0.5 ml-1">
+                            <button
+                              onClick={() => updateScore(subject.id, 'targetType', 'letter')}
+                              className={`px-2 py-1 text-[11px] font-bold rounded transition-all ${targetType === 'letter' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500'}`}
+                            >Chữ</button>
+                            <button
+                              onClick={() => updateScore(subject.id, 'targetType', 'number')}
+                              className={`px-2 py-1 text-[11px] font-bold rounded transition-all ${targetType === 'number' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500'}`}
+                            >Số</button>
+                          </div>
+
+                          {/* Ô Nhập/Chọn */}
+                          {targetType === 'letter' ? (
+                            <select 
+                              value={targetValue} 
+                              onChange={e => updateScore(subject.id, 'target', e.target.value)}
+                              className="bg-transparent font-bold text-blue-600 outline-none text-[13px] ml-1 pr-1 cursor-pointer"
+                            >
+                              <option value="A">A (8.5)</option>
+                              <option value="B+">B+ (8.0)</option>
+                              <option value="B">B (7.0)</option>
+                              <option value="C+">C+ (6.5)</option>
+                              <option value="C">C (5.5)</option>
+                              <option value="D+">D+ (5.0)</option>
+                              <option value="D">D (4.0)</option>
+                            </select>
+                          ) : (
+                            <input 
+                              type="text" 
+                              inputMode="decimal"
+                              placeholder="8.5"
+                              value={targetValue} 
+                              onChange={e => updateScore(subject.id, 'target', e.target.value)}
+                              className="w-[45px] bg-white border border-slate-300 rounded px-1.5 py-1 text-[13px] font-bold text-blue-600 text-center ml-1 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
+                            />
+                          )}
                         </div>
                         
                         <div className="flex items-center gap-2 w-full md:w-auto justify-end">
-                            {reqA > 0 && reqA <= 10 && target > 0 && (
+                            {reqA > 0 && reqA <= 10 && numTarget > 0 && (
                               <button
                                 onClick={() => updateScore(subject.id, 'final', reqA.toFixed(2))}
                                 className="text-[12px] bg-white border border-blue-200 hover:bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg transition-colors font-bold shadow-sm active:scale-95 cursor-pointer flex items-center gap-1"
@@ -309,8 +362,8 @@ export default function App() {
                                 ⚡ Tự điền
                               </button>
                             )}
-                            <span className={`font-bold px-3 py-1.5 rounded-lg text-[13px] border ${target <= 0 ? 'bg-slate-50 text-slate-500 border-slate-200' : (reqA <= 0 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : (reqA > 10 ? 'bg-red-50 text-red-600 border-red-200' : 'bg-blue-50 text-blue-700 border-blue-200 shadow-sm'))}`}>
-                              {target <= 0 ? 'Nhập MT' : (reqA <= 0 ? 'Đã đạt MT 🎉' : (reqA > 10 ? 'Không thể đạt ❌' : `Cần thi ${reqA.toFixed(2)}`))}
+                            <span className={`font-bold px-3 py-1.5 rounded-lg text-[13px] border ${numTarget <= 0 ? 'bg-slate-50 text-slate-500 border-slate-200' : (reqA <= 0 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : (reqA > 10 ? 'bg-red-50 text-red-600 border-red-200' : 'bg-blue-50 text-blue-700 border-blue-200 shadow-sm'))}`}>
+                              {numTarget <= 0 ? 'Chưa nhập' : (reqA <= 0 ? 'Đã đạt MT 🎉' : (reqA > 10 ? 'Không thể đạt ❌' : `Cần thi ${reqA.toFixed(2)}`))}
                             </span>
                         </div>
                       </div>
@@ -322,7 +375,6 @@ export default function App() {
           </div>
         </div>
 
-        {/* MODAL: XÁC NHẬN XÓA */}
         {subjectToDelete && (
           <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full animate-[fadeIn_0.2s_ease-out]">
@@ -345,7 +397,6 @@ export default function App() {
           </div>
         )}
 
-        {/* MODAL: THÊM MÔN HỌC MỚI */}
         {showAddModal && (
           <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 overflow-y-auto">
             <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full my-8 animate-[fadeIn_0.2s_ease-out]">
