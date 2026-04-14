@@ -57,7 +57,7 @@ export default function App() {
 
   useEffect(() => {
     try {
-      const savedScores = localStorage.getItem('gpa-ly-data-v2');
+      const savedScores = localStorage.getItem('gpa-ly-data-v3');
       if (savedScores) {
         const parsed = JSON.parse(savedScores);
         Object.keys(parsed).forEach(key => { parsed[key].final = ''; });
@@ -70,11 +70,10 @@ export default function App() {
 
   useEffect(() => {
     if (isLoaded) {
-      localStorage.setItem('gpa-ly-data-v2', JSON.stringify(scores));
+      localStorage.setItem('gpa-ly-data-v3', JSON.stringify(scores));
     }
   }, [scores, isLoaded]);
 
-  // Cập nhật điểm: Chỉ cho phép nhập số và dấu chấm
   const updateScore = (subjectId, field, value) => {
     const validValue = value.replace(/[^0-9.]/g, '');
     setScores(prev => ({
@@ -114,19 +113,20 @@ export default function App() {
         <div className="w-full md:w-[260px] bg-slate-50 border-b md:border-b-0 md:border-r border-slate-200 p-5 flex flex-col shrink-0">
           <div className="flex items-center gap-3 mb-4 md:mb-8 px-2">
             <span className="text-[24px]">🚀</span>
-            <h1 className="text-[18px] font-bold text-slate-800 tracking-tight">GPA Master</h1>
+            {/* ĐÂY LÀ CHỖ NHẬN DIỆN V3 */}
+            <h1 className="text-[18px] font-bold text-slate-800 tracking-tight text-blue-600">GPA Master V3</h1>
           </div>
           <div className="mt-auto pt-4 md:pt-6 border-t border-slate-200">
             <p className="text-[13px] text-[#0ea5e9] font-semibold">"{quote}" {emoji}</p>
           </div>
         </div>
 
-        <div className="flex-1 flex flex-col h-full bg-white">
+        <div className="flex-1 flex flex-col h-full bg-white relative z-10 pointer-events-auto">
           <div className="hidden md:flex px-8 py-6 justify-between items-center border-b border-slate-100 shrink-0">
             <h2 className="text-[22px] font-bold text-slate-800">Trung tâm điều khiển</h2>
           </div>
 
-          <div className="flex-1 overflow-y-auto custom-scroll p-4 md:p-8 pb-24">
+          <div className="flex-1 overflow-y-auto custom-scroll p-4 md:p-8 pb-24 relative z-20 pointer-events-auto">
             <div className="bg-slate-50 rounded-[16px] p-6 border border-slate-100 mb-8">
               <h3 className="text-[16px] font-semibold text-slate-700 mb-6 text-center md:text-left">Hiệu suất học tập</h3>
               <div className="flex justify-around items-center">
@@ -136,7 +136,7 @@ export default function App() {
             </div>
 
             <h3 className="text-[16px] font-semibold text-slate-700 mb-4 px-2">Cài đặt môn học</h3>
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-5 relative z-30">
               {subjectsList.map((subject) => {
                 const s = scores[subject.id] || { attendance: '', midterm: '', final: '' };
                 const att = parseFloat(s.attendance) || 0;
@@ -148,28 +148,31 @@ export default function App() {
                 }
 
                 return (
-                  <div key={subject.id} className="bg-white rounded-[16px] p-5 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                  <div key={subject.id} className="bg-white rounded-[16px] p-5 border border-slate-200 shadow-sm relative z-40 pointer-events-auto">
                     <div className="mb-4">
                       <h4 className="text-[15px] font-semibold text-slate-800">{subject.name}</h4>
                       <p className="text-[13px] text-slate-500 mt-0.5">Tín chỉ: {subject.credits}</p>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-3">
-                      <div className="flex flex-col">
+                    <div className="grid grid-cols-3 gap-3 relative z-50">
+                      <div className="flex flex-col relative z-[9999]">
                         <label className="text-[11px] font-medium text-slate-500 mb-1">10% C.Cần</label>
                         <input type="text" inputMode="decimal" placeholder="0" value={s.attendance} onChange={(e) => updateScore(subject.id, 'attendance', e.target.value)}
-                          className="w-full bg-white border border-slate-300 rounded-[8px] px-3 py-2 text-[14px] text-slate-900 focus:outline-none focus:border-[#0ea5e9] focus:ring-2 focus:ring-[#0ea5e9]/30 transition-all shadow-inner" />
+                          style={{ pointerEvents: 'auto', position: 'relative', zIndex: 99999 }}
+                          className="w-full bg-slate-50 border border-slate-300 rounded-[8px] px-3 py-2 text-[14px] text-slate-900 focus:outline-none focus:border-[#0ea5e9] focus:bg-white focus:ring-2 focus:ring-[#0ea5e9]/30" />
                       </div>
-                      <div className="flex flex-col">
+                      <div className="flex flex-col relative z-[9999]">
                         <label className="text-[11px] font-medium text-slate-500 mb-1">{subject.weights.midterm * 100}% Q.Trình</label>
                         <input type="text" inputMode="decimal" placeholder="0" value={s.midterm} onChange={(e) => updateScore(subject.id, 'midterm', e.target.value)}
-                          className="w-full bg-white border border-slate-300 rounded-[8px] px-3 py-2 text-[14px] text-slate-900 focus:outline-none focus:border-[#0ea5e9] focus:ring-2 focus:ring-[#0ea5e9]/30 transition-all shadow-inner" />
+                          style={{ pointerEvents: 'auto', position: 'relative', zIndex: 99999 }}
+                          className="w-full bg-slate-50 border border-slate-300 rounded-[8px] px-3 py-2 text-[14px] text-slate-900 focus:outline-none focus:border-[#0ea5e9] focus:bg-white focus:ring-2 focus:ring-[#0ea5e9]/30" />
                       </div>
                       {subject.hasFinal ? (
-                        <div className="flex flex-col">
+                        <div className="flex flex-col relative z-[9999]">
                           <label className="text-[11px] font-bold text-[#0ea5e9] mb-1">50% Cuối kì</label>
                           <input type="text" inputMode="decimal" placeholder="0" value={s.final} onChange={(e) => updateScore(subject.id, 'final', e.target.value)}
-                            className="w-full bg-blue-50 border border-blue-300 rounded-[8px] px-3 py-2 text-[14px] font-bold text-[#0ea5e9] focus:outline-none focus:border-[#0ea5e9] focus:ring-2 focus:ring-[#0ea5e9]/30 transition-all shadow-inner" />
+                            style={{ pointerEvents: 'auto', position: 'relative', zIndex: 99999 }}
+                            className="w-full bg-blue-50 border border-blue-300 rounded-[8px] px-3 py-2 text-[14px] font-bold text-[#0ea5e9] focus:outline-none focus:border-[#0ea5e9] focus:bg-white focus:ring-2 focus:ring-[#0ea5e9]/30" />
                         </div>
                       ) : (
                         <div className="flex items-center justify-center bg-slate-100 border border-slate-200 rounded-[8px]">
@@ -177,15 +180,6 @@ export default function App() {
                         </div>
                       )}
                     </div>
-
-                    {subject.hasFinal && (
-                      <div className="mt-4 flex items-center justify-between text-[13px] pt-3 border-t border-slate-100">
-                        <span className="text-slate-500">Mục tiêu A (8.5):</span>
-                        <span className={`font-bold px-3 py-1 rounded-full ${requiredForA > 10 ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-700'}`}>
-                          {requiredForA <= 0 ? 'Đã đạt' : (requiredForA > 10 ? 'Không thể đạt' : `Cần thi ${requiredForA.toFixed(2)}`)}
-                        </span>
-                      </div>
-                    )}
                   </div>
                 );
               })}
