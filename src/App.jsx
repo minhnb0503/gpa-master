@@ -51,44 +51,37 @@ const CircularProgress = ({ value, label, max }) => {
 };
 
 export default function App() {
-  // KHÔNG DÙNG STORE NỮA - Dùng State chuẩn của React để tránh lỗi
   const [scores, setScores] = useState({});
   const [quote, setQuote] = useState("");
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Khởi chạy 1 lần: Load điểm cũ & Lấy câu chúc
   useEffect(() => {
     try {
-      const savedScores = localStorage.getItem('gpa-ly-data');
+      const savedScores = localStorage.getItem('gpa-ly-data-v2');
       if (savedScores) {
         const parsed = JSON.parse(savedScores);
-        // Tự động xóa điểm thi cuối kì để nhập lại
-        Object.keys(parsed).forEach(key => {
-          parsed[key].final = '';
-        });
+        Object.keys(parsed).forEach(key => { parsed[key].final = ''; });
         setScores(parsed);
       }
-    } catch (error) {
-      console.log("Lỗi đọc dữ liệu");
-    }
+    } catch (error) {}
     setQuote(quotes[Math.floor(Math.random() * quotes.length)]);
     setIsLoaded(true);
   }, []);
 
-  // Tự động lưu ngay khi có người gõ điểm
   useEffect(() => {
     if (isLoaded) {
-      localStorage.setItem('gpa-ly-data', JSON.stringify(scores));
+      localStorage.setItem('gpa-ly-data-v2', JSON.stringify(scores));
     }
   }, [scores, isLoaded]);
 
-  // Hàm update cực kỳ đơn giản và chuẩn xác
+  // Cập nhật điểm: Chỉ cho phép nhập số và dấu chấm
   const updateScore = (subjectId, field, value) => {
+    const validValue = value.replace(/[^0-9.]/g, '');
     setScores(prev => ({
       ...prev,
       [subjectId]: {
         ...(prev[subjectId] || { attendance: '', midterm: '', final: '' }),
-        [field]: value
+        [field]: validValue
       }
     }));
   };
@@ -116,40 +109,24 @@ export default function App() {
 
   return (
     <div className="min-h-screen p-0 md:p-6 flex items-center justify-center bg-[#e8f4fc]">
-      
       <div className="w-full max-w-[1200px] bg-white border border-slate-200 rounded-none md:rounded-[24px] shadow-2xl flex flex-col md:flex-row h-screen md:h-[90vh] overflow-hidden">
         
-        {/* Sidebar */}
         <div className="w-full md:w-[260px] bg-slate-50 border-b md:border-b-0 md:border-r border-slate-200 p-5 flex flex-col shrink-0">
           <div className="flex items-center gap-3 mb-4 md:mb-8 px-2">
             <span className="text-[24px]">🚀</span>
             <h1 className="text-[18px] font-bold text-slate-800 tracking-tight">GPA Master</h1>
           </div>
-
-          <nav className="hidden md:flex flex-col gap-2">
-            <button className="flex items-center gap-3 px-4 py-3 bg-white text-[#0ea5e9] font-semibold rounded-[12px] shadow-sm border border-slate-100">
-              Tổng quan
-            </button>
-            <button className="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-100 font-medium rounded-[12px] transition-colors">
-              Chi tiết môn học
-            </button>
-          </nav>
-
           <div className="mt-auto pt-4 md:pt-6 border-t border-slate-200">
             <p className="text-[13px] text-[#0ea5e9] font-semibold">"{quote}" {emoji}</p>
           </div>
         </div>
 
-        {/* Nội dung chính */}
         <div className="flex-1 flex flex-col h-full bg-white">
-          
           <div className="hidden md:flex px-8 py-6 justify-between items-center border-b border-slate-100 shrink-0">
             <h2 className="text-[22px] font-bold text-slate-800">Trung tâm điều khiển</h2>
           </div>
 
-          {/* Khu vực cuộn chứa các ô nhập điểm */}
           <div className="flex-1 overflow-y-auto custom-scroll p-4 md:p-8 pb-24">
-            
             <div className="bg-slate-50 rounded-[16px] p-6 border border-slate-100 mb-8">
               <h3 className="text-[16px] font-semibold text-slate-700 mb-6 text-center md:text-left">Hiệu suất học tập</h3>
               <div className="flex justify-around items-center">
@@ -171,43 +148,41 @@ export default function App() {
                 }
 
                 return (
-                  <div key={subject.id} className="bg-white rounded-[16px] p-5 border border-slate-200 shadow-sm">
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h4 className="text-[15px] font-semibold text-slate-800">{subject.name}</h4>
-                        <p className="text-[13px] text-slate-500 mt-0.5">Tín chỉ: {subject.credits}</p>
-                      </div>
+                  <div key={subject.id} className="bg-white rounded-[16px] p-5 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="mb-4">
+                      <h4 className="text-[15px] font-semibold text-slate-800">{subject.name}</h4>
+                      <p className="text-[13px] text-slate-500 mt-0.5">Tín chỉ: {subject.credits}</p>
                     </div>
 
                     <div className="grid grid-cols-3 gap-3">
                       <div className="flex flex-col">
                         <label className="text-[11px] font-medium text-slate-500 mb-1">10% C.Cần</label>
-                        <input type="number" value={s.attendance} onChange={(e) => updateScore(subject.id, 'attendance', e.target.value)}
-                          className="w-full bg-slate-50 border border-slate-200 rounded-[8px] px-3 py-2 text-[14px] focus:outline-none focus:border-[#0ea5e9] focus:bg-white focus:ring-1 focus:ring-[#0ea5e9] transition-all" />
+                        <input type="text" inputMode="decimal" placeholder="0" value={s.attendance} onChange={(e) => updateScore(subject.id, 'attendance', e.target.value)}
+                          className="w-full bg-white border border-slate-300 rounded-[8px] px-3 py-2 text-[14px] text-slate-900 focus:outline-none focus:border-[#0ea5e9] focus:ring-2 focus:ring-[#0ea5e9]/30 transition-all shadow-inner" />
                       </div>
                       <div className="flex flex-col">
                         <label className="text-[11px] font-medium text-slate-500 mb-1">{subject.weights.midterm * 100}% Q.Trình</label>
-                        <input type="number" value={s.midterm} onChange={(e) => updateScore(subject.id, 'midterm', e.target.value)}
-                          className="w-full bg-slate-50 border border-slate-200 rounded-[8px] px-3 py-2 text-[14px] focus:outline-none focus:border-[#0ea5e9] focus:bg-white focus:ring-1 focus:ring-[#0ea5e9] transition-all" />
+                        <input type="text" inputMode="decimal" placeholder="0" value={s.midterm} onChange={(e) => updateScore(subject.id, 'midterm', e.target.value)}
+                          className="w-full bg-white border border-slate-300 rounded-[8px] px-3 py-2 text-[14px] text-slate-900 focus:outline-none focus:border-[#0ea5e9] focus:ring-2 focus:ring-[#0ea5e9]/30 transition-all shadow-inner" />
                       </div>
                       {subject.hasFinal ? (
                         <div className="flex flex-col">
-                          <label className="text-[11px] font-medium text-[#0ea5e9] mb-1">50% Cuối kì</label>
-                          <input type="number" value={s.final} onChange={(e) => updateScore(subject.id, 'final', e.target.value)}
-                            className="w-full bg-blue-50 border border-blue-200 rounded-[8px] px-3 py-2 text-[14px] font-semibold text-[#0ea5e9] focus:outline-none focus:border-[#0ea5e9] focus:bg-white focus:ring-1 focus:ring-[#0ea5e9] transition-all" />
+                          <label className="text-[11px] font-bold text-[#0ea5e9] mb-1">50% Cuối kì</label>
+                          <input type="text" inputMode="decimal" placeholder="0" value={s.final} onChange={(e) => updateScore(subject.id, 'final', e.target.value)}
+                            className="w-full bg-blue-50 border border-blue-300 rounded-[8px] px-3 py-2 text-[14px] font-bold text-[#0ea5e9] focus:outline-none focus:border-[#0ea5e9] focus:ring-2 focus:ring-[#0ea5e9]/30 transition-all shadow-inner" />
                         </div>
                       ) : (
-                        <div className="flex items-center justify-center bg-slate-50 border border-slate-200 rounded-[8px]">
+                        <div className="flex items-center justify-center bg-slate-100 border border-slate-200 rounded-[8px]">
                           <span className="text-[11px] text-slate-400 font-medium">Ko thi CK</span>
                         </div>
                       )}
                     </div>
 
                     {subject.hasFinal && (
-                      <div className="mt-4 flex items-center justify-between text-[13px]">
-                        <span className="text-slate-500">Mục tiêu A:</span>
-                        <span className={`font-semibold px-3 py-1 rounded-full ${requiredForA > 10 ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>
-                          {requiredForA <= 0 ? 'Đã đạt' : (requiredForA > 10 ? 'Tạch A rồi' : `Cần ${requiredForA.toFixed(2)}`)}
+                      <div className="mt-4 flex items-center justify-between text-[13px] pt-3 border-t border-slate-100">
+                        <span className="text-slate-500">Mục tiêu A (8.5):</span>
+                        <span className={`font-bold px-3 py-1 rounded-full ${requiredForA > 10 ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-700'}`}>
+                          {requiredForA <= 0 ? 'Đã đạt' : (requiredForA > 10 ? 'Không thể đạt' : `Cần thi ${requiredForA.toFixed(2)}`)}
                         </span>
                       </div>
                     )}
@@ -215,16 +190,6 @@ export default function App() {
                 );
               })}
             </div>
-
-            <div className="mt-8 flex justify-center pb-8">
-              <button 
-                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                className="bg-[#0ea5e9] hover:bg-[#0284c7] text-white px-8 py-3 rounded-[12px] font-medium transition-colors shadow-lg active:scale-95 w-full md:w-auto"
-              >
-                Tính xong!
-              </button>
-            </div>
-
           </div>
         </div>
       </div>
