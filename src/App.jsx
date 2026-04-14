@@ -23,25 +23,30 @@ const convertTo4Scale = (score) => {
 export default function App() {
   const [scores, setScores] = useState({});
 
-  // Khôi phục dữ liệu cũ nếu có
+  // Khôi phục dữ liệu
   useEffect(() => {
     try {
-      const saved = localStorage.getItem('gpa-master-v6');
+      const saved = localStorage.getItem('gpa-master-v7');
       if (saved) setScores(JSON.parse(saved));
     } catch (e) {
       console.error(e);
     }
   }, []);
 
-  // Tự động lưu khi có thay đổi
+  // Tự động lưu
   useEffect(() => {
-    localStorage.setItem('gpa-master-v6', JSON.stringify(scores));
+    localStorage.setItem('gpa-master-v7', JSON.stringify(scores));
   }, [scores]);
 
+  // Hàm update điểm: Cấm các ký tự chữ cái, chỉ cho phép số và dấu chấm
   const updateScore = (id, field, val) => {
+    const cleanVal = val.replace(/[^0-9.]/g, '');
+    // Chặn nhập 2 dấu chấm
+    if ((cleanVal.match(/\./g) || []).length > 1) return;
+
     setScores(prev => ({
       ...prev,
-      [id]: { ...(prev[id] || { attendance: '', midterm: '', final: '' }), [field]: val }
+      [id]: { ...(prev[id] || { attendance: '', midterm: '', final: '' }), [field]: cleanVal }
     }));
   };
 
@@ -103,18 +108,18 @@ export default function App() {
                 <div className="grid grid-cols-3 gap-3 md:gap-4">
                   <div>
                     <label className="block text-xs font-semibold text-slate-500 mb-1">C.Cần (10%)</label>
-                    <input type="number" step="0.1" value={s.attendance} onChange={e => updateScore(sub.id, 'attendance', e.target.value)}
+                    <input type="text" inputMode="decimal" placeholder="0" value={s.attendance} onChange={e => updateScore(sub.id, 'attendance', e.target.value)}
                       className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all" />
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-slate-500 mb-1">Q.Trình ({sub.weights.midterm * 100}%)</label>
-                    <input type="number" step="0.1" value={s.midterm} onChange={e => updateScore(sub.id, 'midterm', e.target.value)}
+                    <input type="text" inputMode="decimal" placeholder="0" value={s.midterm} onChange={e => updateScore(sub.id, 'midterm', e.target.value)}
                       className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all" />
                   </div>
                   {sub.hasFinal ? (
                     <div>
                       <label className="block text-xs font-bold text-blue-600 mb-1">C.Kì (50%)</label>
-                      <input type="number" step="0.1" value={s.final} onChange={e => updateScore(sub.id, 'final', e.target.value)}
+                      <input type="text" inputMode="decimal" placeholder="0" value={s.final} onChange={e => updateScore(sub.id, 'final', e.target.value)}
                         className="w-full bg-blue-50 border border-blue-300 rounded-lg px-3 py-2 font-bold text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all" />
                     </div>
                   ) : (
@@ -126,10 +131,22 @@ export default function App() {
                 
                 {sub.hasFinal && (
                   <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-sm">
-                    <span className="text-slate-500 font-medium">Mục tiêu A (8.5): </span>
-                    <span className={`font-bold px-3 py-1 rounded-full ${reqA <= 0 ? 'bg-green-100 text-green-700' : (reqA > 10 ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-700')}`}>
-                      {reqA <= 0 ? 'Đã đạt' : (reqA > 10 ? 'Không thể đạt' : `Cần ${reqA.toFixed(2)}`)}
-                    </span>
+                    <span className="text-slate-500 font-medium hidden md:inline">Mục tiêu A (8.5): </span>
+                    <span className="text-slate-500 font-medium md:hidden">Cần thi CK: </span>
+                    <div className="flex items-center gap-3">
+                        {/* Nút bấm tự điền điểm */}
+                        {reqA > 0 && reqA <= 10 && (
+                          <button
+                            onClick={() => updateScore(sub.id, 'final', reqA.toFixed(2))}
+                            className="text-[12px] bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1.5 rounded-lg transition-colors font-bold shadow-sm active:scale-95 cursor-pointer"
+                          >
+                            ⚡ Tự điền
+                          </button>
+                        )}
+                        <span className={`font-bold px-3 py-1.5 rounded-full text-[12px] md:text-sm ${reqA <= 0 ? 'bg-green-100 text-green-700' : (reqA > 10 ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-700')}`}>
+                          {reqA <= 0 ? 'Đã đạt' : (reqA > 10 ? 'Không thể đạt' : `${reqA.toFixed(2)} điểm`)}
+                        </span>
+                    </div>
                   </div>
                 )}
               </div>
