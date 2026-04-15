@@ -44,19 +44,23 @@ const convertTo4Scale = (score) => {
   return 0.0;
 };
 
-// === COMPONENT CHỮ CHẠY ===
+// === COMPONENT CHỮ CHẠY (ĐÃ FIX LỖI UNDEFINED) ===
 const TypingText = ({ text, colorClass = "text-white" }) => {
   const [displayedText, setDisplayedText] = useState("");
   
   useEffect(() => {
     let currentIndex = 0;
     setDisplayedText("");
-    const charsArray = Array.from(text);
+    const charsArray = Array.from(text || ""); // An toàn hơn nếu text rỗng
     
     const timer = setInterval(() => {
-      setDisplayedText((prev) => prev + charsArray[currentIndex]);
-      currentIndex++;
-      if (currentIndex === charsArray.length) clearInterval(timer);
+      if (currentIndex < charsArray.length) {
+        // Cắt mảng từ đầu đến vị trí hiện tại và join lại, tránh hoàn toàn lỗi undefined
+        setDisplayedText(charsArray.slice(0, currentIndex + 1).join(""));
+        currentIndex++;
+      } else {
+        clearInterval(timer);
+      }
     }, 50);
     
     return () => clearInterval(timer);
@@ -112,7 +116,7 @@ export default function App() {
 
   useEffect(() => {
     try {
-      const savedData = localStorage.getItem('gpa-master-v14');
+      const savedData = localStorage.getItem('gpa-master-v15');
       if (savedData) {
         const parsed = JSON.parse(savedData);
         setScores(parsed.scores || {});
@@ -132,7 +136,7 @@ export default function App() {
 
   useEffect(() => {
     if (isLoaded) {
-      localStorage.setItem('gpa-master-v14', JSON.stringify({ scores, subjectsList }));
+      localStorage.setItem('gpa-master-v15', JSON.stringify({ scores, subjectsList }));
     }
   }, [scores, subjectsList, isLoaded]);
 
@@ -170,7 +174,6 @@ export default function App() {
     setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
   };
 
-  // ĐÃ FIX: Hàm Chọn tất cả được gán chính xác
   const selectAll = () => {
     if (selectedIds.length === subjectsList.length) setSelectedIds([]);
     else setSelectedIds(subjectsList.map(s => s.id));
@@ -265,7 +268,7 @@ export default function App() {
         </div>
 
         {/* === MAIN CONTENT === */}
-        <div className="flex-1 flex flex-col bg-[#fcfcfc] relative">
+        <div className="flex-1 flex flex-col h-full bg-[#fcfcfc] relative">
           
           <div className="sticky top-0 z-30 bg-white/90 backdrop-blur-md px-4 md:px-8 py-4 border-b border-slate-200 flex flex-row justify-between items-center gap-2">
             <div className="flex flex-col">
@@ -285,8 +288,6 @@ export default function App() {
 
           <div className={`overflow-hidden transition-all duration-300 ${isSelectionMode ? 'max-h-[80px] border-b border-slate-200 bg-slate-50/50' : 'max-h-0'}`}>
              <div className="px-4 md:px-8 py-3 flex items-center justify-between">
-                
-                {/* ĐÃ FIX: Nút Chọn Tất Cả sử dụng thẻ button để nhận onClick 100% an toàn */}
                 <button onClick={selectAll} className="flex items-center gap-3 outline-none group cursor-pointer">
                   <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${selectedIds.length === subjectsList.length && subjectsList.length > 0 ? 'bg-blue-600 border-blue-600' : 'border-slate-300 group-hover:border-blue-400'}`}>
                     {selectedIds.length === subjectsList.length && subjectsList.length > 0 && <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>}
@@ -421,7 +422,7 @@ export default function App() {
 
         {/* === MODALS TÍNH NĂNG === */}
         
-        {/* MODAL CÀI ĐẶT MỤC TIÊU SANG CHẢNH - ĐÃ FIX HIỆU ỨNG TRƯỢT 100% */}
+        {/* MODAL CÀI ĐẶT MỤC TIÊU SANG CHẢNH - CĂN GIỮA VÀ HIỆU ỨNG TRƯỢT 100% */}
         {targetModalSubject && (() => {
            const id = targetModalSubject; 
            const s = scores[id] || {}; 
@@ -445,8 +446,7 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* ĐÃ FIX: Container có chiều cao cố định để không bị co giật khi đổi tab */}
-                <div className="relative h-[180px] w-full">
+                <div className="relative h-[180px] w-full overflow-hidden">
                   
                   {/* Bảng Điểm Chữ - Flex Center chuẩn không rớt dòng */}
                   <div className={`absolute inset-0 transition-all duration-300 ease-out ${currentType === 'letter' ? 'opacity-100 translate-x-0 z-10 pointer-events-auto' : 'opacity-0 -translate-x-10 z-0 pointer-events-none'}`}>
@@ -555,10 +555,16 @@ export default function App() {
               </div>
               
               <div className="flex gap-4">
-                <button onClick={() => setShowAddModal(false)} className="flex-1 py-4 font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 rounded-2xl transition-colors active:scale-95">
+                <button 
+                  onClick={() => setShowAddModal(false)} 
+                  className="flex-1 py-4 font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 rounded-2xl transition-colors active:scale-95"
+                >
                   Hủy bỏ
                 </button>
-                <button onClick={handleAddSubject} className="flex-[1.5] py-4 font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-2xl shadow-lg shadow-blue-200 transition-all active:scale-95">
+                <button 
+                  onClick={handleAddSubject} 
+                  className="flex-[1.5] py-4 font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-2xl shadow-lg shadow-blue-200 transition-all active:scale-95"
+                >
                   + Thêm ngay
                 </button>
               </div>
