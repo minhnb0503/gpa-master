@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react';
 
-const defaultSubjects = [
-  { id: "CNTT1112_02", name: "Kiến trúc máy tính", credits: 3, weights: { attendance: 0.1, midterm: 0.4, final: 0.5 }, hasFinal: true },
-  { id: "CNTT1114_03", name: "Mạng máy tính & truyền số liệu", credits: 3, weights: { attendance: 0.1, midterm: 0.4, final: 0.5 }, hasFinal: true },
-  { id: "CNTT1137_02", name: "Phân tích nghiệp vụ", credits: 3, weights: { attendance: 0.1, midterm: 0.4, final: 0.5 }, hasFinal: true },
-  { id: "CNTT1165_02", name: "Thiết kế WEB", credits: 3, weights: { attendance: 0.1, midterm: 0.4, final: 0.5 }, hasFinal: true },
-  { id: "CNTT1186_02", name: "Công nghệ hiện đại CNTT", credits: 3, weights: { attendance: 0.1, midterm: 0.9, final: 0 }, hasFinal: false },
-  { id: "LLNL1106_12", name: "Kinh tế chính trị Mác Lênin", credits: 2, weights: { attendance: 0.1, midterm: 0.4, final: 0.5 }, hasFinal: true }
+const defaultSuggestions = [
+  { id: "S_1", name: "Triết học Mác - Lênin", credits: 3, weights: { attendance: 0.1, midterm: 0.4, final: 0.5 }, hasFinal: true },
+  { id: "S_2", name: "Kinh tế vi mô", credits: 3, weights: { attendance: 0.1, midterm: 0.4, final: 0.5 }, hasFinal: true },
+  { id: "S_3", name: "Toán cho các nhà kinh tế", credits: 4, weights: { attendance: 0.1, midterm: 0.4, final: 0.5 }, hasFinal: true },
+  { id: "S_4", name: "Pháp luật đại cương", credits: 2, weights: { attendance: 0.1, midterm: 0.4, final: 0.5 }, hasFinal: true },
+  { id: "S_5", name: "Tin học đại cương", credits: 3, weights: { attendance: 0.1, midterm: 0.4, final: 0.5 }, hasFinal: true },
+  { id: "S_6", name: "Tiếng Anh chuyên ngành", credits: 3, weights: { attendance: 0.1, midterm: 0.4, final: 0.5 }, hasFinal: true }
 ];
 
 const quotes = [
@@ -18,467 +18,316 @@ const quotes = [
   "Nhìn Ly chăm chỉ mà anh thấy yêu quá, cố lên nốt môn này nha! ✨"
 ];
 
-const gradeScale = {
-  'A': 8.5, 'B+': 8.0, 'B': 7.0, 'C+': 6.5, 'C': 5.5, 'D+': 5.0, 'D': 4.0
-};
-
+const gradeScale = { 'A': 8.5, 'B+': 8.0, 'B': 7.0, 'C+': 6.5, 'C': 5.5, 'D+': 5.0, 'D': 4.0 };
 const gradeDescriptions = {
-  'A': "Xuất sắc, đỉnh cao phong độ! ✨",
-  'B+': "Giỏi, rất đáng khen ngợi. 👍",
-  'B': "Khá, một kết quả vững chắc. ✅",
-  'C+': "Trung bình khá, cần cố gắng chút nữa. 💪",
-  'C': "Trung bình, qua môn an toàn. 🛡️",
-  'D+': "Yếu khá, sát nút qua môn. 😅",
-  'D': "Yếu, qua môn tối thiểu. ⚠️"
+  'A': "Xuất sắc, đỉnh cao phong độ! ✨", 'B+': "Giỏi, rất đáng khen ngợi. 👍", 'B': "Khá, một kết quả vững chắc. ✅",
+  'C+': "Trung bình khá, cần cố gắng. 💪", 'C': "Trung bình, qua môn an toàn. 🛡️", 'D+': "Yếu khá, sát nút qua môn. 😅", 'D': "Yếu, qua môn tối thiểu. ⚠️"
 };
 
 const convertTo4Scale = (score) => {
-  if (score >= 8.5) return 4.0;
-  if (score >= 8.0) return 3.5;
-  if (score >= 7.0) return 3.0;
-  if (score >= 6.5) return 2.5;
-  if (score >= 5.5) return 2.0;
-  if (score >= 5.0) return 1.5;
-  if (score >= 4.0) return 1.0;
-  return 0.0;
+  if (score >= 8.5) return 4.0; if (score >= 8.0) return 3.5; if (score >= 7.0) return 3.0;
+  if (score >= 6.5) return 2.5; if (score >= 5.5) return 2.0; if (score >= 5.0) return 1.5;
+  if (score >= 4.0) return 1.0; return 0.0;
 };
 
-// Hiệu ứng chữ chạy xịn sò
 const TypingText = ({ text, colorClass = "text-white" }) => {
   const [displayedText, setDisplayedText] = useState("");
   const typingIndex = useRef(0);
-  const chars = Array.from(text);
-
   useEffect(() => {
-    typingIndex.current = 0;
-    setDisplayedText("");
-    
+    const chars = Array.from(text);
+    typingIndex.current = 0; setDisplayedText("");
     const interval = setInterval(() => {
-      setDisplayedText((prev) => {
-        if (typingIndex.current < chars.length) {
-          const nextChar = chars[typingIndex.current];
-          typingIndex.current++;
-          return prev + nextChar;
-        } else {
-          clearInterval(interval);
-          return prev;
-        }
-      });
-    }, 50);
-
+      if (typingIndex.current < chars.length) {
+        setDisplayedText(text.slice(0, Array.from(text.slice(0, typingIndex.current + 1)).length === typingIndex.current + 1 ? typingIndex.current + 1 : typingIndex.current + 2));
+        typingIndex.current++;
+      } else clearInterval(interval);
+    }, 40);
     return () => clearInterval(interval);
   }, [text]);
-
-  return (
-    <p className={`${colorClass} font-medium leading-relaxed min-h-[60px] text-[14px]`}>
-      {displayedText}
-      <span className="animate-pulse inline-block w-1.5 h-4 bg-current ml-1 align-middle opacity-80"></span>
-    </p>
-  );
+  // Bản fix typing đơn giản hơn cho emoji
+  const [simpleText, setSimpleText] = useState("");
+  useEffect(() => {
+    let i = 0; setSimpleText("");
+    const t = Array.from(text);
+    const timer = setInterval(() => {
+      setSimpleText(prev => prev + t[i]);
+      i++;
+      if (i === t.length) clearInterval(timer);
+    }, 50);
+    return () => clearInterval(timer);
+  }, [text]);
+  return <p className={`${colorClass} font-medium leading-relaxed min-h-[60px] text-[14px]`}>{simpleText}<span className="animate-pulse inline-block w-1.5 h-4 bg-current ml-1 align-middle"></span></p>;
 };
 
-const CircularProgress = ({ value, mainText, subText, max, colorClass, trailColor = "text-slate-100" }) => {
-  const radius = 36;
-  const circumference = 2 * Math.PI * radius;
-  const safeValue = Math.min(Math.max(value, 0), max);
-  const strokeDashoffset = circumference - (safeValue / max) * circumference;
-  
+const CircularProgress = ({ value, mainText, subText, max, colorClass }) => {
+  const radius = 36; const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (Math.min(value, max) / max) * circumference;
   return (
     <div className="flex flex-col items-center">
       <div className="relative flex items-center justify-center w-20 h-20 md:w-24 md:h-24 mb-2">
-        <svg className="transform -rotate-90 w-full h-full absolute inset-0">
-          <circle cx="50%" cy="50%" r={radius} stroke="currentColor" strokeWidth="7" fill="transparent" className={trailColor} />
-          <circle cx="50%" cy="50%" r={radius} stroke="currentColor" strokeWidth="7" fill="transparent"
-            strokeDasharray={circumference} strokeDashoffset={strokeDashoffset}
-            className={`${colorClass} transition-all duration-1000 ease-out`} strokeLinecap="round" />
-        </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-[18px] md:text-[20px] font-extrabold text-slate-800 leading-none">{mainText}</span>
-        </div>
+        <svg className="transform -rotate-90 w-full h-full absolute inset-0"><circle cx="50%" cy="50%" r={radius} stroke="currentColor" strokeWidth="7" fill="transparent" className="text-slate-100" /><circle cx="50%" cy="50%" r={radius} stroke="currentColor" strokeWidth="7" fill="transparent" strokeDasharray={circumference} strokeDashoffset={strokeDashoffset} className={`${colorClass} transition-all duration-1000`} strokeLinecap="round" /></svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center"><span className="text-[18px] md:text-[20px] font-extrabold text-slate-800">{mainText}</span></div>
       </div>
-      <span className="text-[12px] md:text-[13px] font-bold text-slate-700 text-center">{subText}</span>
+      <span className="text-[11px] md:text-[12px] font-bold text-slate-500 uppercase">{subText}</span>
     </div>
   );
 };
 
 export default function App() {
-  const [subjectsList, setSubjectsList] = useState(defaultSubjects);
+  const [subjectsList, setSubjectsList] = useState([]);
   const [scores, setScores] = useState({});
+  const [selectedIds, setSelectedIds] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [quote, setQuote] = useState("");
-
   const [subjectToDelete, setSubjectToDelete] = useState(null);
+  const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [newSub, setNewSub] = useState({ name: '', credits: 3, attW: 10, midW: 40, finW: 50, hasFinal: true });
-  
+  const [showBulkAddModal, setShowBulkAddModal] = useState(false);
   const [targetModalSubject, setTargetModalSubject] = useState(null);
+  const [newSub, setNewSub] = useState({ name: '', credits: 3, attW: 10, midW: 40, finW: 50, hasFinal: true });
 
   useEffect(() => {
     try {
-      const savedData = localStorage.getItem('gpa-master-final-v2');
-      if (savedData) {
-        const parsed = JSON.parse(savedData);
-        if (parsed.scores) setScores(parsed.scores);
-        if (parsed.subjectsList && parsed.subjectsList.length > 0) setSubjectsList(parsed.subjectsList);
-      }
-    } catch (e) {
-      console.error(e);
-    }
+      const saved = localStorage.getItem('gpa-master-v12');
+      if (saved) {
+        const p = JSON.parse(saved);
+        setScores(p.scores || {});
+        setSubjectsList(p.subjectsList || []);
+      } else { setSubjectsList([
+        { id: "INIT_1", name: "Kiến trúc máy tính", credits: 3, weights: { attendance: 0.1, midterm: 0.4, final: 0.5 }, hasFinal: true },
+        { id: "INIT_2", name: "Thiết kế WEB", credits: 3, weights: { attendance: 0.1, midterm: 0.4, final: 0.5 }, hasFinal: true }
+      ]);}
+    } catch (e) {}
     setQuote(quotes[Math.floor(Math.random() * quotes.length)]);
     setIsLoaded(true);
   }, []);
 
   useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem('gpa-master-final-v2', JSON.stringify({ scores, subjectsList }));
-    }
+    if (isLoaded) localStorage.setItem('gpa-master-v12', JSON.stringify({ scores, subjectsList }));
   }, [scores, subjectsList, isLoaded]);
 
   const updateScore = (id, field, val) => {
-    let cleanVal = val;
-    if (['attendance', 'midterm', 'final'].includes(field)) {
-      cleanVal = val.replace(/[^0-9.]/g, '');
-      if ((cleanVal.match(/\./g) || []).length > 1) return;
-    } else if (field === 'target' && scores[id]?.targetType === 'number') {
-      cleanVal = val.replace(/[^0-9.]/g, '');
-      if ((cleanVal.match(/\./g) || []).length > 1) return;
-    }
-
+    let c = val;
+    if (['attendance', 'midterm', 'final'].includes(field)) { c = val.replace(/[^0-9.]/g, ''); if ((c.match(/\./g) || []).length > 1) return; }
     setScores(prev => {
-      const currentSubjectData = prev[id] || { attendance: '', midterm: '', final: '', target: 'A', targetType: 'letter' };
-      if (field === 'targetType') {
-         return {
-           ...prev,
-           [id]: { ...currentSubjectData, targetType: cleanVal, target: cleanVal === 'letter' ? 'A' : '8.5' }
-         };
-      }
-      return {
-        ...prev,
-        [id]: { ...currentSubjectData, [field]: cleanVal }
-      };
+      const d = prev[id] || { attendance: '', midterm: '', final: '', target: 'A', targetType: 'letter' };
+      if (field === 'targetType') return { ...prev, [id]: { ...d, targetType: c, target: c === 'letter' ? 'A' : '8.5' } };
+      return { ...prev, [id]: { ...d, [field]: c } };
     });
   };
 
-  const handleAddSubject = () => {
-    if (!newSub.name.trim()) return alert("Khánh Ly nhớ nhập tên môn học nhé!");
-    const id = "SUB_" + Date.now();
-    const newSubject = {
-      id, name: newSub.name, credits: parseInt(newSub.credits) || 0,
-      weights: { attendance: (parseFloat(newSub.attW) || 0) / 100, midterm: (parseFloat(newSub.midW) || 0) / 100, final: newSub.hasFinal ? (parseFloat(newSub.finW) || 0) / 100 : 0 },
-      hasFinal: newSub.hasFinal
-    };
-    setSubjectsList([...subjectsList, newSubject]);
-    setShowAddModal(false);
-    setNewSub({ name: '', credits: 3, attW: 10, midW: 40, finW: 50, hasFinal: true });
-  };
-
-  const confirmDelete = () => {
-    setSubjectsList(prev => prev.filter(s => s.id !== subjectToDelete.id));
-    setSubjectToDelete(null);
-  };
-
-  let totalCredits = 0, totalPoints = 0, completedSubjects = 0;
+  const toggleSelect = (id) => setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  const selectAll = () => setSelectedIds(selectedIds.length === subjectsList.length ? [] : subjectsList.map(s => s.id));
   
-  subjectsList.forEach(sub => {
-    const s = scores[sub.id] || { attendance: '', midterm: '', final: '' };
-    const att = parseFloat(s.attendance) || 0;
-    const mid = parseFloat(s.midterm) || 0;
-    const fin = parseFloat(s.final) || 0;
-    
-    if (att > 0 || mid > 0 || fin > 0) completedSubjects += 1;
-    if (att || mid || fin) {
-      totalCredits += sub.credits;
-      const final10 = (att * sub.weights.attendance) + (mid * sub.weights.midterm) + (fin * sub.weights.final);
-      totalPoints += convertTo4Scale(final10) * sub.credits;
-    }
-  });
+  const handleBulkDelete = () => {
+    setSubjectsList(prev => prev.filter(s => !selectedIds.includes(s.id)));
+    setSelectedIds([]);
+    setShowBulkDeleteModal(false);
+  };
 
+  const handleBulkAdd = (items) => {
+    const news = items.map(it => ({ ...it, id: "BULK_" + Math.random().toString(36).substr(2, 9) }));
+    setSubjectsList(prev => [...prev, ...news]);
+    setShowBulkAddModal(false);
+  };
+
+  let totalCredits = 0, totalPoints = 0, completed = 0;
+  subjectsList.forEach(sub => {
+    const s = scores[sub.id] || {};
+    const att = parseFloat(s.attendance) || 0, mid = parseFloat(s.midterm) || 0, fin = parseFloat(s.final) || 0;
+    if (att > 0 || mid > 0 || fin > 0) completed++;
+    if (att || mid || fin) { totalCredits += sub.credits; totalPoints += convertTo4Scale((att * sub.weights.attendance) + (mid * sub.weights.midterm) + (fin * sub.weights.final)) * sub.credits; }
+  });
   const gpa = totalCredits > 0 ? (totalPoints / totalCredits).toFixed(2) : "0.00";
 
-  if (!isLoaded) return <div className="min-h-screen bg-[#f0f4f8]"></div>;
-
   return (
-    <div className="min-h-screen bg-[#f0f4f8] p-0 md:p-6 font-sans text-slate-800 flex justify-center relative">
-      <div className="w-full max-w-[1280px] bg-white md:rounded-[24px] shadow-none md:shadow-2xl flex flex-col md:flex-row min-h-screen md:min-h-[90vh] md:overflow-hidden border-0 md:border border-slate-200">
+    <div className="min-h-screen bg-[#f1f5f9] font-sans text-slate-800 flex justify-center p-0 md:p-6">
+      <div className="w-full max-w-[1200px] bg-white md:rounded-[32px] shadow-2xl flex flex-col md:flex-row md:h-[90vh] overflow-hidden">
         
         {/* Sidebar */}
-        <div className="w-full md:w-[280px] bg-[#f8fafc] border-b md:border-b-0 md:border-r border-slate-200 p-4 md:p-6 flex flex-col shrink-0 relative z-10">
-          <div className="flex items-center justify-center md:justify-start gap-3 mb-6 md:mb-8 mt-2 md:mt-0">
-            <span className="text-[28px] md:text-[32px] drop-shadow-md">🚀</span>
-            <h1 className="text-[20px] md:text-[22px] font-extrabold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent tracking-tight">GPA Master</h1>
+        <div className="w-full md:w-[300px] bg-[#f8fafc] border-b md:border-r border-slate-200 p-6 flex flex-col shrink-0">
+          <div className="flex items-center gap-3 mb-8">
+            <span className="text-3xl">🚀</span>
+            <h1 className="text-xl font-black bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">GPA MASTER</h1>
           </div>
           
-          <div className="bg-white rounded-2xl p-4 md:p-5 border border-slate-200 shadow-sm flex flex-col items-center mb-5 md:mb-6">
-            <h3 className="text-[13px] md:text-[14px] font-bold text-slate-500 mb-4 uppercase tracking-wider">Hiệu suất học tập</h3>
-            <div className="flex flex-row justify-around items-center w-full">
-              <CircularProgress value={completedSubjects} mainText={`${completedSubjects}/${subjectsList.length}`} subText="Tiến độ" max={subjectsList.length} colorClass="text-emerald-500" />
-              <div className="h-16 w-px bg-slate-100 mx-2"></div>
-              <CircularProgress value={gpa} mainText={gpa} subText="GPA Hệ 4" max={4.0} colorClass="text-purple-500" />
+          <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm mb-6">
+            <div className="flex flex-row justify-around w-full">
+              <CircularProgress value={completed} mainText={`${completed}/${subjectsList.length}`} subText="Tiến độ" max={subjectsList.length || 1} colorClass="text-emerald-500" />
+              <div className="w-px bg-slate-100 mx-2" />
+              <CircularProgress value={gpa} mainText={gpa} subText="GPA Hệ 4" max={4.0} colorClass="text-blue-600" />
             </div>
           </div>
 
-          <div className="mt-2 md:mt-auto bg-gradient-to-br from-blue-500 to-cyan-400 rounded-2xl p-4 md:p-5 shadow-md text-white mb-2 md:mb-0">
-            <div className="flex items-center gap-2 mb-2 opacity-80">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd"></path></svg>
-              <span className="text-[12px] font-bold uppercase tracking-wider">Gửi Khánh Ly</span>
-            </div>
-            <TypingText text={quote} />
+          <div className="mt-auto bg-blue-600 rounded-3xl p-5 text-white shadow-lg shadow-blue-200">
+             <TypingText text={quote} />
           </div>
         </div>
 
-        {/* Nội dung chính */}
-        <div className="flex-1 flex flex-col h-full bg-[#f8fafc] relative z-10">
-          <div className="flex justify-between items-center px-4 md:px-8 py-4 md:py-5 border-b border-slate-200 bg-white shadow-sm sticky top-0 z-20">
-            <h2 className="text-[18px] md:text-[24px] font-extrabold text-slate-800">Quản lý môn học</h2>
-            <button 
-              onClick={() => setShowAddModal(true)}
-              className="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white w-10 h-10 md:w-auto md:h-auto md:px-4 md:py-2 rounded-xl font-bold transition-all shadow-md active:scale-95"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
-              <span className="hidden md:inline md:ml-2">Thêm môn mới</span>
-            </button>
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col bg-[#fcfcfc] relative">
+          <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md px-6 py-4 border-b border-slate-200 flex justify-between items-center">
+            <div className="flex flex-col">
+              <h2 className="text-lg font-bold">Môn học của Ly</h2>
+              {selectedIds.length > 0 && <span className="text-xs text-blue-600 font-bold">Đã chọn {selectedIds.length} môn</span>}
+            </div>
+            <div className="flex gap-2">
+              {selectedIds.length > 0 ? (
+                <button onClick={() => setShowBulkDeleteModal(true)} className="bg-red-50 text-red-600 px-4 py-2 rounded-xl font-bold text-sm border border-red-100 flex items-center gap-2 transition-all active:scale-95"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>Xóa đã chọn</button>
+              ) : (
+                <>
+                  <button onClick={() => setShowBulkAddModal(true)} className="bg-blue-50 text-blue-600 px-4 py-2 rounded-xl font-bold text-sm border border-blue-100 transition-all active:scale-95">Nạp nhanh</button>
+                  <button onClick={() => setShowAddModal(true)} className="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold text-sm shadow-md transition-all active:scale-95">+ Thêm môn</button>
+                </>
+              )}
+            </div>
           </div>
 
-          <div className="flex-1 overflow-visible md:overflow-y-auto custom-scroll p-3 md:p-8 space-y-4 md:space-y-5 pb-10">
-            {subjectsList.length === 0 ? (
-              <div className="text-center py-20 text-slate-400 font-medium">Chưa có môn học nào, Ly thêm môn mới nhé!</div>
-            ) : (
-              subjectsList.map((subject) => {
-                const s = scores[subject.id] || { attendance: '', midterm: '', final: '' };
-                const att = parseFloat(s.attendance) || 0;
-                const mid = parseFloat(s.midterm) || 0;
-                const targetType = s.targetType || 'letter';
-                const targetValue = s.target || 'A';
-                
-                let numTarget = targetType === 'letter' ? (gradeScale[targetValue] || 8.5) : (parseFloat(targetValue) || 0);
-                let reqA = subject.hasFinal ? (numTarget - (att * subject.weights.attendance) - (mid * subject.weights.midterm)) / subject.weights.final : 0;
+          <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 pb-20">
+            {subjectsList.length > 0 && (
+              <div className="flex items-center gap-2 px-2 mb-2">
+                <input type="checkbox" checked={selectedIds.length === subjectsList.length && subjectsList.length > 0} onChange={selectAll} className="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer" />
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Chọn tất cả</span>
+              </div>
+            )}
+            
+            {subjectsList.map(sub => {
+              const s = scores[sub.id] || {};
+              const tType = s.targetType || 'letter';
+              const tVal = s.target || 'A';
+              const numT = tType === 'letter' ? (gradeScale[tVal] || 8.5) : (parseFloat(tVal) || 0);
+              const att = parseFloat(s.attendance) || 0, mid = parseFloat(s.midterm) || 0;
+              const req = sub.hasFinal ? (numT - (att * sub.weights.attendance) - (mid * sub.weights.midterm)) / sub.weights.final : 0;
 
-                return (
-                  <div key={subject.id} className="bg-white rounded-2xl p-4 md:p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow relative group">
-                    <button onClick={() => setSubjectToDelete(subject)} className="absolute top-3 right-3 md:top-4 md:right-4 p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                    </button>
-
-                    <div className="mb-4 md:mb-5 pr-8">
-                      <h4 className="text-[15px] md:text-[16px] font-bold text-slate-800 leading-tight">{subject.name}</h4>
-                      <p className="text-[12px] md:text-[13px] text-slate-500 mt-1 font-medium bg-slate-100 inline-block px-2 py-0.5 rounded">{subject.credits} tín chỉ</p>
+              return (
+                <div key={sub.id} className={`bg-white rounded-3xl p-5 border-2 transition-all flex items-start gap-4 ${selectedIds.includes(sub.id) ? 'border-blue-500 shadow-md bg-blue-50/30' : 'border-slate-100 shadow-sm'}`}>
+                  <input type="checkbox" checked={selectedIds.includes(sub.id)} onChange={() => toggleSelect(sub.id)} className="w-5 h-5 mt-1 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer" />
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start mb-4">
+                      <div onClick={() => toggleSelect(sub.id)} className="cursor-pointer">
+                        <h4 className="font-bold text-slate-800">{sub.name}</h4>
+                        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">{sub.credits} Tín chỉ</p>
+                      </div>
+                      <button onClick={() => setSubjectToDelete(sub)} className="text-slate-300 hover:text-red-500 transition-colors"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-2 md:gap-4">
-                      <div>
-                        <label className="block text-[10px] md:text-[11px] font-bold text-slate-500 mb-1.5 uppercase truncate text-center md:text-left">C.Cần ({subject.weights.attendance * 100}%)</label>
-                        <input type="text" inputMode="decimal" placeholder="0" value={s.attendance} onChange={e => updateScore(subject.id, 'attendance', e.target.value)}
-                          className="w-full bg-slate-50 border border-slate-300 rounded-xl px-1 md:px-2 py-2 md:py-2.5 text-[14px] md:text-[15px] font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-center shadow-inner" />
-                      </div>
-                      <div>
-                        <label className="block text-[10px] md:text-[11px] font-bold text-slate-500 mb-1.5 uppercase truncate text-center md:text-left">Q.Trình ({subject.weights.midterm * 100}%)</label>
-                        <input type="text" inputMode="decimal" placeholder="0" value={s.midterm} onChange={e => updateScore(subject.id, 'midterm', e.target.value)}
-                          className="w-full bg-slate-50 border border-slate-300 rounded-xl px-1 md:px-2 py-2 md:py-2.5 text-[14px] md:text-[15px] font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-center shadow-inner" />
-                      </div>
-                      {subject.hasFinal ? (
-                        <div>
-                          <label className="block text-[10px] md:text-[11px] font-bold text-blue-600 mb-1.5 uppercase truncate text-center md:text-left">C.Kì ({subject.weights.final * 100}%)</label>
-                          <input type="text" inputMode="decimal" placeholder="0" value={s.final} onChange={e => updateScore(subject.id, 'final', e.target.value)}
-                            className="w-full bg-blue-50 border border-blue-300 rounded-xl px-1 md:px-2 py-2 md:py-2.5 text-[14px] md:text-[15px] font-bold text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-center shadow-inner" />
-                        </div>
-                      ) : (
-                        <div className="flex items-end">
-                          <span className="text-[11px] md:text-[12px] font-bold text-slate-400 bg-slate-100 px-1 md:px-2 py-2 md:py-2.5 rounded-xl w-full text-center border border-slate-200">Không thi CK</span>
-                        </div>
-                      )}
+                    <div className="grid grid-cols-3 gap-3 mb-4">
+                      {['attendance', 'midterm', 'final'].map(f => (
+                        f === 'final' && !sub.hasFinal ? <div key={f} className="bg-slate-50 rounded-2xl flex items-center justify-center border border-slate-100"><span className="text-[10px] font-bold text-slate-300 uppercase">Ko thi</span></div> : (
+                        <div key={f}>
+                          <label className="block text-[9px] font-black text-slate-400 uppercase mb-1 ml-1">{f === 'attendance' ? 'Chuyên cần' : f === 'midterm' ? 'Quá trình' : 'Cuối kì'}</label>
+                          <input type="text" inputMode="decimal" value={s[f] || ''} onChange={e => updateScore(sub.id, f, e.target.value)} className={`w-full text-center py-2 rounded-xl font-bold text-sm border-2 transition-all ${f === 'final' ? 'bg-blue-50 border-blue-100 text-blue-600 focus:border-blue-500' : 'bg-slate-50 border-slate-100 focus:border-blue-400'} focus:outline-none`} />
+                        </div>)
+                      ))}
                     </div>
-                    
-                    {subject.hasFinal && (
-                      <div className="mt-4 md:mt-5 pt-3 md:pt-4 border-t border-slate-100 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 md:gap-4">
-                        
-                        <button 
-                          onClick={() => setTargetModalSubject(subject.id)}
-                          className="flex justify-between items-center bg-slate-50 hover:bg-slate-100 border border-slate-200 px-3 py-2 rounded-xl transition-colors text-left"
-                        >
-                          <div className="flex flex-col">
-                            <span className="text-[10px] md:text-[11px] text-slate-500 font-bold uppercase tracking-wide">Mục tiêu hiện tại</span>
-                            <span className="text-[13px] md:text-[15px] font-extrabold text-blue-600">
-                              {targetType === 'letter' ? `Điểm ${targetValue} (${gradeScale[targetValue]})` : `${targetValue} (Hệ 10)`}
-                            </span>
-                          </div>
-                          <div className="bg-white p-1.5 rounded-lg shadow-sm border border-slate-100 ml-3">
-                            <svg className="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"></path></svg>
-                          </div>
+
+                    {sub.hasFinal && (
+                      <div className="flex items-center justify-between bg-slate-50 rounded-2xl p-3 border border-slate-100">
+                        <button onClick={() => setTargetModalSubject(sub.id)} className="flex flex-col text-left">
+                          <span className="text-[9px] font-black text-slate-400 uppercase">Mục tiêu</span>
+                          <span className="text-xs font-bold text-blue-600">{tType === 'letter' ? `Điểm ${tVal}` : `${tVal} Hệ 10`}</span>
                         </button>
-                        
-                        <div className="flex items-center gap-2 w-full md:w-auto justify-end">
-                            {reqA > 0 && reqA <= 10 && numTarget > 0 && (
-                              <button onClick={() => updateScore(subject.id, 'final', reqA.toFixed(2))} className="text-[12px] bg-white border border-blue-200 hover:bg-blue-50 text-blue-600 px-2 md:px-3 py-2 rounded-xl transition-colors font-bold shadow-sm active:scale-95 flex items-center gap-1">
-                                ⚡ Tự điền
-                              </button>
-                            )}
-                            <span className={`font-bold px-3 py-2 rounded-xl text-[12px] md:text-[13px] border ${numTarget <= 0 ? 'bg-slate-50 text-slate-500 border-slate-200' : (reqA <= 0 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : (reqA > 10 ? 'bg-red-50 text-red-600 border-red-200' : 'bg-blue-50 text-blue-700 border-blue-200 shadow-sm'))}`}>
-                              {numTarget <= 0 ? 'Chưa nhập' : (reqA <= 0 ? 'Đã đạt MT 🎉' : (reqA > 10 ? 'Không thể đạt ❌' : `Cần thi ${reqA.toFixed(2)}`))}
-                            </span>
+                        <div className="flex items-center gap-2">
+                          {req > 0 && req <= 10 && <button onClick={() => updateScore(sub.id, 'final', req.toFixed(2))} className="bg-white text-[10px] font-black text-blue-500 px-2 py-1.5 rounded-lg border border-blue-100 shadow-sm active:scale-95">⚡ TỰ ĐIỀN</button>}
+                          <span className={`text-[11px] font-black px-3 py-1.5 rounded-xl border ${req <= 0 ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : req > 10 ? 'bg-red-50 text-red-500 border-red-100' : 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-100'}`}>{req <= 0 ? 'ĐÃ ĐẠT 🎉' : req > 10 ? 'KHÔNG THỂ ❌' : `CẦN ${req.toFixed(2)}`}</span>
                         </div>
                       </div>
                     )}
                   </div>
-                );
-              })
-            )}
+                </div>
+              );
+            })}
           </div>
         </div>
 
-        {/* MODAL: BẢNG CHỌN MỤC TIÊU SANG CHẢNH - CÓ HIỆU ỨNG CHUYỂN MƯỢT MÀ */}
+        {/* Modal Xóa Hàng Loạt */}
+        {showBulkDeleteModal && (
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+            <div className="bg-white rounded-[32px] p-8 max-w-sm w-full shadow-2xl animate-in zoom-in-95 duration-200">
+              <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6"><svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></div>
+              <h3 className="text-xl font-black text-center mb-2">Xóa {selectedIds.length} môn học?</h3>
+              <p className="text-center text-slate-500 text-sm font-medium mb-8">Ly có chắc chắn không? Toàn bộ điểm số của các môn đã chọn sẽ biến mất vĩnh viễn đó nha em iu.</p>
+              <div className="flex gap-4">
+                <button onClick={() => setShowBulkDeleteModal(false)} className="flex-1 py-3 font-bold text-slate-500 bg-slate-100 rounded-2xl active:scale-95 transition-all">Hủy</button>
+                <button onClick={handleBulkDelete} className="flex-1 py-3 font-bold text-white bg-red-500 rounded-2xl shadow-lg shadow-red-200 active:scale-95 transition-all">Xóa sạch!</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal Nạp Nhanh */}
+        {showBulkAddModal && (
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+            <div className="bg-white rounded-[32px] p-6 max-w-md w-full shadow-2xl">
+              <h3 className="text-xl font-black mb-4">Nạp nhanh danh sách</h3>
+              <div className="space-y-2 mb-6 max-h-[300px] overflow-y-auto pr-2 custom-scroll">
+                {defaultSuggestions.map(s => (
+                  <div key={s.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                    <span className="font-bold text-sm text-slate-700">{s.name} ({s.credits}t)</span>
+                    <button onClick={() => handleBulkAdd([s])} className="text-blue-600 font-black text-xs bg-white px-3 py-1.5 rounded-lg border border-blue-100 shadow-sm active:scale-95">+ THÊM</button>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-3">
+                <button onClick={() => handleBulkAdd(defaultSuggestions)} className="flex-1 py-3 font-bold text-white bg-blue-600 rounded-2xl shadow-lg shadow-blue-200 active:scale-95">+ THÊM TẤT CẢ</button>
+                <button onClick={() => setShowBulkAddModal(false)} className="px-6 py-3 font-bold text-slate-500 bg-slate-100 rounded-2xl active:scale-95">Đóng</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Target Modal (Tích hợp từ bản trước) */}
         {targetModalSubject && (() => {
-           const id = targetModalSubject;
-           const currentTargetType = scores[id]?.targetType || 'letter';
-           const currentTargetVal = scores[id]?.target || 'A';
-           const descText = currentTargetType === 'letter' 
-              ? `Ly đặt mục tiêu điểm ${currentTargetVal}: ${gradeDescriptions[currentTargetVal] || ""}` 
-              : `Ly muốn đạt điểm số: ${currentTargetVal} (Hệ 10)`;
-
+           const id = targetModalSubject; const s = scores[id] || {}; const tType = s.targetType || 'letter'; const tVal = s.target || 'A';
            return (
-            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[9999] flex items-end md:items-center justify-center p-0 md:p-4 animate-[fadeIn_0.2s_ease-out]">
-              <div className="bg-white rounded-t-[32px] md:rounded-[24px] shadow-2xl p-6 md:p-8 w-full max-w-lg transform transition-all animate-[slideUp_0.3s_ease-out]">
-                
-                <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-6 md:hidden"></div>
-                
-                <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-8 border-b border-slate-100 pb-4 md:pb-6 gap-4">
-                  <div>
-                    <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-                      <svg className="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path></svg>
-                      Cài đặt Mục tiêu
-                    </h3>
-                    <p className="text-[12px] font-medium text-slate-500 mt-1 truncate max-w-[250px]">
-                      {subjectsList.find(s => s.id === id)?.name}
-                    </p>
-                  </div>
-                  
-                  {/* CÔNG TẮC CHUYỂN ĐỔI CÓ HIỆU ỨNG TRƯỢT MƯỢT MÀ */}
-                  <div className="relative flex bg-slate-100 p-1.5 rounded-xl border border-slate-200 shadow-inner w-full md:w-[200px]">
-                    {/* Thanh trượt nền trắng */}
-                    <div 
-                      className={`absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] bg-white rounded-lg shadow-sm transition-transform duration-300 ease-out z-0 ${currentTargetType === 'letter' ? 'translate-x-0' : 'translate-x-[calc(100%+4px)]'}`}
-                    ></div>
-                    <button 
-                      onClick={() => updateScore(id, 'targetType', 'letter')} 
-                      className={`relative z-10 flex-1 px-3 py-2 text-[13px] font-bold rounded-lg transition-colors duration-300 ${currentTargetType === 'letter' ? "text-blue-600" : "text-slate-500 hover:text-slate-700"}`}
-                    >
-                      Điểm chữ
-                    </button>
-                    <button 
-                      onClick={() => updateScore(id, 'targetType', 'number')} 
-                      className={`relative z-10 flex-1 px-3 py-2 text-[13px] font-bold rounded-lg transition-colors duration-300 ${currentTargetType === 'number' ? "text-blue-600" : "text-slate-500 hover:text-slate-700"}`}
-                    >
-                      Điểm số
-                    </button>
+            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-end md:items-center justify-center">
+              <div className="bg-white rounded-t-[40px] md:rounded-[32px] p-8 w-full max-w-lg shadow-2xl">
+                <div className="flex justify-between items-center mb-8">
+                  <h3 className="text-xl font-black">Đặt Mục Tiêu</h3>
+                  <div className="flex bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
+                    <button onClick={() => updateScore(id, 'targetType', 'letter')} className={`px-4 py-2 text-xs font-black rounded-xl transition-all ${tType === 'letter' ? "bg-white text-blue-600 shadow-md" : "text-slate-400"}`}>CHỮ</button>
+                    <button onClick={() => updateScore(id, 'targetType', 'number')} className={`px-4 py-2 text-xs font-black rounded-xl transition-all ${tType === 'number' ? "bg-white text-blue-600 shadow-md" : "text-slate-400"}`}>SỐ</button>
                   </div>
                 </div>
-
-                {/* KHUNG NỘI DUNG CÓ HIỆU ỨNG MỜ DẦN (FADE-IN) */}
-                <div key={currentTargetType} className="min-h-[120px] animate-[fadeIn_0.3s_ease-out]">
-                  {currentTargetType === 'letter' ? (
-                    <div className="grid grid-cols-4 gap-2 mb-6">
-                      {Object.keys(gradeScale).map((grade) => (
-                        <button key={grade} onClick={() => updateScore(id, 'target', grade)}
-                          className={`p-3 rounded-xl border font-bold text-center transition-all ${currentTargetVal === grade ? "bg-blue-600 text-white border-blue-700 shadow-md scale-105" : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-white hover:border-blue-300 hover:text-blue-600"}`}>
-                          <div className="text-xl">{grade}</div>
-                          <div className="text-[10px] font-medium opacity-80">({gradeScale[grade]})</div>
-                        </button>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="mb-6">
-                      <div className="flex items-center gap-4 mb-4">
-                          <input type="range" min="4.0" max="10.0" step="0.1" value={parseFloat(currentTargetVal) || 4.0} onChange={(e) => updateScore(id, 'target', parseFloat(e.target.value).toFixed(1))} className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600 shadow-inner" />
-                          <div className="w-[100px] p-3 rounded-xl bg-blue-50 text-blue-700 border border-blue-200 text-center shadow-inner shrink-0">
-                              <div className="text-3xl font-extrabold">{currentTargetVal}</div>
-                          </div>
-                      </div>
-                      <div className="flex justify-between text-[11px] text-slate-400 px-1 font-medium">
-                          <span>4.0 (D)</span>
-                          <span>7.0 (B)</span>
-                          <span>10.0 (A)</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="mt-4 pt-4 border-t border-slate-100 bg-blue-50/50 p-4 rounded-xl">
-                    <TypingText text={descText} colorClass="text-blue-700" />
-                </div>
-
-                <button onClick={() => setTargetModalSubject(null)} className="w-full mt-6 bg-slate-800 hover:bg-slate-900 text-white font-bold py-3.5 rounded-xl transition-colors shadow-lg active:scale-95">
-                  Xác nhận xong!
-                </button>
+                {tType === 'letter' ? (
+                  <div className="grid grid-cols-4 gap-3 mb-8">
+                    {Object.keys(gradeScale).map(g => (
+                      <button key={g} onClick={() => updateScore(id, 'target', g)} className={`py-4 rounded-2xl border-2 font-black transition-all ${tVal === g ? "border-blue-500 bg-blue-50 text-blue-600 scale-105" : "border-slate-100 text-slate-400"}`}>{g}</button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="mb-8 px-2">
+                    <input type="range" min="4.0" max="10.0" step="0.1" value={tVal} onChange={e => updateScore(id, 'target', e.target.value)} className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600 mb-4" />
+                    <div className="text-4xl font-black text-blue-600 text-center">{tVal}</div>
+                  </div>
+                )}
+                <div className="bg-blue-50 p-4 rounded-2xl mb-8"><p className="text-blue-700 text-sm font-bold text-center">"{tType === 'letter' ? gradeDescriptions[tVal] : 'Bé cố gắng đạt con số này nhé!'}"</p></div>
+                <button onClick={() => setTargetModalSubject(null)} className="w-full py-4 bg-slate-900 text-white font-black rounded-2xl shadow-xl active:scale-95 transition-all">XÁC NHẬN</button>
               </div>
             </div>
            );
         })()}
 
-        {/* MODAL: XÁC NHẬN XÓA */}
-        {subjectToDelete && (
-          <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full animate-[fadeIn_0.2s_ease-out]">
-              <div className="text-red-500 w-12 h-12 mx-auto mb-4 bg-red-50 rounded-full flex items-center justify-center">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+        {/* Modal Thêm Môn (Tích hợp bản cũ) */}
+        {showAddModal && (
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+            <div className="bg-white rounded-[32px] p-8 max-w-md w-full shadow-2xl">
+              <h3 className="text-xl font-black mb-6">Môn mới cho Ly</h3>
+              <div className="space-y-4 mb-8">
+                <input type="text" placeholder="Tên môn học..." value={newSub.name} onChange={e => setNewSub({...newSub, name: e.target.value})} className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold focus:outline-none focus:border-blue-500" />
+                <div className="grid grid-cols-2 gap-4">
+                  <input type="number" placeholder="Tín chỉ" value={newSub.credits} onChange={e => setNewSub({...newSub, credits: e.target.value})} className="px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-center" />
+                  <label className="flex items-center gap-3 px-4 bg-slate-50 border-2 border-slate-100 rounded-2xl cursor-pointer"><input type="checkbox" checked={newSub.hasFinal} onChange={e => setNewSub({...newSub, hasFinal: e.target.checked})} className="w-5 h-5 rounded text-blue-600" /><span className="text-xs font-bold text-slate-500">Có thi CK</span></label>
+                </div>
               </div>
-              <h3 className="text-xl font-bold text-center text-slate-800 mb-2">Chờ đã nào!</h3>
-              <p className="text-center text-slate-600 font-medium mb-6">Ly có chắc chắn muốn xóa môn <strong className="text-slate-800">"{subjectToDelete.name}"</strong> không? Điểm đã nhập sẽ mất đó nha.</p>
-              <div className="flex gap-3">
-                <button onClick={() => setSubjectToDelete(null)} className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl transition-colors">Hủy bỏ</button>
-                <button onClick={confirmDelete} className="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-2.5 rounded-xl transition-colors shadow-lg shadow-red-500/30">Xóa luôn!</button>
+              <div className="flex gap-4">
+                <button onClick={() => setShowAddModal(false)} className="flex-1 py-4 font-bold text-slate-400 bg-slate-100 rounded-2xl">Hủy</button>
+                <button onClick={handleAddSubject} className="flex-1 py-4 font-bold text-white bg-blue-600 rounded-2xl shadow-lg shadow-blue-200">Thêm ngay</button>
               </div>
             </div>
           </div>
         )}
 
-        {/* MODAL: THÊM MÔN HỌC MỚI */}
-        {showAddModal && (
-          <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 overflow-y-auto">
-            <div className="bg-white rounded-2xl shadow-2xl p-5 md:p-6 max-w-md w-full my-8 animate-[fadeIn_0.2s_ease-out]">
-              <h3 className="text-lg md:text-xl font-bold text-slate-800 mb-5 flex items-center gap-2">
-                <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>Thêm môn học mới
-              </h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-[13px] font-bold text-slate-700 mb-1">Tên môn học</label>
-                  <input type="text" value={newSub.name} onChange={e => setNewSub({...newSub, name: e.target.value})} placeholder="VD: Triết học Mác Lênin..." className="w-full border border-slate-300 rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none" />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-[13px] font-bold text-slate-700 mb-1">Số tín chỉ</label>
-                    <input type="number" value={newSub.credits} onChange={e => setNewSub({...newSub, credits: e.target.value})} className="w-full border border-slate-300 rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none text-center" />
-                  </div>
-                  <div className="flex items-center justify-center pt-6">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input type="checkbox" checked={newSub.hasFinal} onChange={e => setNewSub({...newSub, hasFinal: e.target.checked})} className="w-5 h-5 text-blue-600 rounded border-slate-300 focus:ring-blue-500" />
-                      <span className="text-[13px] font-bold text-slate-700">Có thi Cuối Kì</span>
-                    </label>
-                  </div>
-                </div>
-                <div className="bg-slate-50 p-3 md:p-4 rounded-xl border border-slate-200">
-                  <label className="block text-[12px] md:text-[13px] font-bold text-slate-700 mb-3 text-center">Trọng số điểm (%)</label>
-                  <div className="grid grid-cols-3 gap-2">
-                    <div>
-                      <label className="block text-[10px] md:text-[11px] text-slate-500 mb-1 text-center">Chuyên Cần</label>
-                      <input type="number" value={newSub.attW} onChange={e => setNewSub({...newSub, attW: e.target.value})} className="w-full border border-slate-300 rounded-lg px-1 md:px-2 py-2 text-center text-[14px]" />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] md:text-[11px] text-slate-500 mb-1 text-center">Quá Trình</label>
-                      <input type="number" value={newSub.midW} onChange={e => setNewSub({...newSub, midW: e.target.value})} className="w-full border border-slate-300 rounded-lg px-1 md:px-2 py-2 text-center text-[14px]" />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] md:text-[11px] text-slate-500 mb-1 text-center">Cuối Kì</label>
-                      <input type="number" disabled={!newSub.hasFinal} value={newSub.hasFinal ? newSub.finW : 0} onChange={e => setNewSub({...newSub, finW: e.target.value})} className={`w-full border border-slate-300 rounded-lg px-1 md:px-2 py-2 text-center text-[14px] ${!newSub.hasFinal ? 'bg-slate-200 text-slate-400' : ''}`} />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="flex gap-3 mt-6">
-                <button onClick={() => setShowAddModal(false)} className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl transition-colors">Hủy</button>
-                <button onClick={handleAddSubject} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition-colors shadow-lg shadow-blue-500/30">Thêm môn</button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
