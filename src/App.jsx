@@ -43,7 +43,7 @@ const convertTo4Scale = (score) => {
   return 0.0;
 };
 
-// Hiệu ứng chữ chạy xịn sò (Đã fix lỗi font)
+// Hiệu ứng chữ chạy xịn sò
 const TypingText = ({ text, colorClass = "text-white" }) => {
   const [displayedText, setDisplayedText] = useState("");
   const typingIndex = useRef(0);
@@ -111,12 +111,11 @@ export default function App() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [newSub, setNewSub] = useState({ name: '', credits: 3, attW: 10, midW: 40, finW: 50, hasFinal: true });
   
-  // State quản lý Modal Cài đặt Mục tiêu
   const [targetModalSubject, setTargetModalSubject] = useState(null);
 
   useEffect(() => {
     try {
-      const savedData = localStorage.getItem('gpa-master-final');
+      const savedData = localStorage.getItem('gpa-master-final-v2');
       if (savedData) {
         const parsed = JSON.parse(savedData);
         if (parsed.scores) setScores(parsed.scores);
@@ -131,7 +130,7 @@ export default function App() {
 
   useEffect(() => {
     if (isLoaded) {
-      localStorage.setItem('gpa-master-final', JSON.stringify({ scores, subjectsList }));
+      localStorage.setItem('gpa-master-final-v2', JSON.stringify({ scores, subjectsList }));
     }
   }, [scores, subjectsList, isLoaded]);
 
@@ -292,7 +291,6 @@ export default function App() {
                     {subject.hasFinal && (
                       <div className="mt-4 md:mt-5 pt-3 md:pt-4 border-t border-slate-100 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 md:gap-4">
                         
-                        {/* Nút Mở Bảng Chọn Mục Tiêu Chuyên Nghiệp */}
                         <button 
                           onClick={() => setTargetModalSubject(subject.id)}
                           className="flex justify-between items-center bg-slate-50 hover:bg-slate-100 border border-slate-200 px-3 py-2 rounded-xl transition-colors text-left"
@@ -327,7 +325,7 @@ export default function App() {
           </div>
         </div>
 
-        {/* MODAL: BẢNG CHỌN MỤC TIÊU SANG CHẢNH (Tích hợp vào App) */}
+        {/* MODAL: BẢNG CHỌN MỤC TIÊU SANG CHẢNH - CÓ HIỆU ỨNG CHUYỂN MƯỢT MÀ */}
         {targetModalSubject && (() => {
            const id = targetModalSubject;
            const currentTargetType = scores[id]?.targetType || 'letter';
@@ -342,7 +340,7 @@ export default function App() {
                 
                 <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-6 md:hidden"></div>
                 
-                <div className="flex items-center justify-between mb-8 border-b border-slate-100 pb-4">
+                <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-8 border-b border-slate-100 pb-4 md:pb-6 gap-4">
                   <div>
                     <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
                       <svg className="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path></svg>
@@ -353,37 +351,55 @@ export default function App() {
                     </p>
                   </div>
                   
-                  <div className="flex bg-slate-100 p-1.5 rounded-xl border border-slate-200 shadow-inner">
-                    <button onClick={() => updateScore(id, 'targetType', 'letter')} className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${currentTargetType === 'letter' ? "bg-white text-blue-600 shadow-sm" : "text-slate-500"}`}>Điểm chữ</button>
-                    <button onClick={() => updateScore(id, 'targetType', 'number')} className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${currentTargetType === 'number' ? "bg-white text-blue-600 shadow-sm" : "text-slate-500"}`}>Điểm số</button>
+                  {/* CÔNG TẮC CHUYỂN ĐỔI CÓ HIỆU ỨNG TRƯỢT MƯỢT MÀ */}
+                  <div className="relative flex bg-slate-100 p-1.5 rounded-xl border border-slate-200 shadow-inner w-full md:w-[200px]">
+                    {/* Thanh trượt nền trắng */}
+                    <div 
+                      className={`absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] bg-white rounded-lg shadow-sm transition-transform duration-300 ease-out z-0 ${currentTargetType === 'letter' ? 'translate-x-0' : 'translate-x-[calc(100%+4px)]'}`}
+                    ></div>
+                    <button 
+                      onClick={() => updateScore(id, 'targetType', 'letter')} 
+                      className={`relative z-10 flex-1 px-3 py-2 text-[13px] font-bold rounded-lg transition-colors duration-300 ${currentTargetType === 'letter' ? "text-blue-600" : "text-slate-500 hover:text-slate-700"}`}
+                    >
+                      Điểm chữ
+                    </button>
+                    <button 
+                      onClick={() => updateScore(id, 'targetType', 'number')} 
+                      className={`relative z-10 flex-1 px-3 py-2 text-[13px] font-bold rounded-lg transition-colors duration-300 ${currentTargetType === 'number' ? "text-blue-600" : "text-slate-500 hover:text-slate-700"}`}
+                    >
+                      Điểm số
+                    </button>
                   </div>
                 </div>
 
-                {currentTargetType === 'letter' ? (
-                  <div className="grid grid-cols-4 gap-2 mb-6">
-                    {Object.keys(gradeScale).map((grade) => (
-                      <button key={grade} onClick={() => updateScore(id, 'target', grade)}
-                        className={`p-3 rounded-xl border font-bold text-center transition-all ${currentTargetVal === grade ? "bg-blue-600 text-white border-blue-700 shadow-md scale-105" : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-white hover:border-blue-300 hover:text-blue-600"}`}>
-                        <div className="text-xl">{grade}</div>
-                        <div className="text-[10px] font-medium opacity-80">({gradeScale[grade]})</div>
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="mb-6">
-                    <div className="flex items-center gap-4 mb-4">
-                        <input type="range" min="4.0" max="10.0" step="0.1" value={parseFloat(currentTargetVal) || 4.0} onChange={(e) => updateScore(id, 'target', parseFloat(e.target.value).toFixed(1))} className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600 shadow-inner" />
-                        <div className="w-[100px] p-3 rounded-xl bg-blue-50 text-blue-700 border border-blue-200 text-center shadow-inner shrink-0">
-                            <div className="text-3xl font-extrabold">{currentTargetVal}</div>
-                        </div>
+                {/* KHUNG NỘI DUNG CÓ HIỆU ỨNG MỜ DẦN (FADE-IN) */}
+                <div key={currentTargetType} className="min-h-[120px] animate-[fadeIn_0.3s_ease-out]">
+                  {currentTargetType === 'letter' ? (
+                    <div className="grid grid-cols-4 gap-2 mb-6">
+                      {Object.keys(gradeScale).map((grade) => (
+                        <button key={grade} onClick={() => updateScore(id, 'target', grade)}
+                          className={`p-3 rounded-xl border font-bold text-center transition-all ${currentTargetVal === grade ? "bg-blue-600 text-white border-blue-700 shadow-md scale-105" : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-white hover:border-blue-300 hover:text-blue-600"}`}>
+                          <div className="text-xl">{grade}</div>
+                          <div className="text-[10px] font-medium opacity-80">({gradeScale[grade]})</div>
+                        </button>
+                      ))}
                     </div>
-                    <div className="flex justify-between text-[11px] text-slate-400 px-1 font-medium">
-                        <span>4.0 (D)</span>
-                        <span>7.0 (B)</span>
-                        <span>10.0 (A)</span>
+                  ) : (
+                    <div className="mb-6">
+                      <div className="flex items-center gap-4 mb-4">
+                          <input type="range" min="4.0" max="10.0" step="0.1" value={parseFloat(currentTargetVal) || 4.0} onChange={(e) => updateScore(id, 'target', parseFloat(e.target.value).toFixed(1))} className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600 shadow-inner" />
+                          <div className="w-[100px] p-3 rounded-xl bg-blue-50 text-blue-700 border border-blue-200 text-center shadow-inner shrink-0">
+                              <div className="text-3xl font-extrabold">{currentTargetVal}</div>
+                          </div>
+                      </div>
+                      <div className="flex justify-between text-[11px] text-slate-400 px-1 font-medium">
+                          <span>4.0 (D)</span>
+                          <span>7.0 (B)</span>
+                          <span>10.0 (A)</span>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
 
                 <div className="mt-4 pt-4 border-t border-slate-100 bg-blue-50/50 p-4 rounded-xl">
                     <TypingText text={descText} colorClass="text-blue-700" />
