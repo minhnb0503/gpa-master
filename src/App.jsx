@@ -44,18 +44,17 @@ const convertTo4Scale = (score) => {
   return 0.0;
 };
 
-// === COMPONENT CHỮ CHẠY (ĐÃ FIX LỖI UNDEFINED) ===
+// === COMPONENT CHỮ CHẠY TÌNH CẢM ===
 const TypingText = ({ text, colorClass = "text-white" }) => {
   const [displayedText, setDisplayedText] = useState("");
   
   useEffect(() => {
     let currentIndex = 0;
     setDisplayedText("");
-    const charsArray = Array.from(text || ""); // An toàn hơn nếu text rỗng
+    const charsArray = Array.from(text || "");
     
     const timer = setInterval(() => {
       if (currentIndex < charsArray.length) {
-        // Cắt mảng từ đầu đến vị trí hiện tại và join lại, tránh hoàn toàn lỗi undefined
         setDisplayedText(charsArray.slice(0, currentIndex + 1).join(""));
         currentIndex++;
       } else {
@@ -112,7 +111,9 @@ export default function App() {
   const [showBulkAddModal, setShowBulkAddModal] = useState(false);
   const [targetModalSubject, setTargetModalSubject] = useState(null);
   
-  const [newSub, setNewSub] = useState({ name: '', credits: 3, attW: 10, midW: 40, finW: 50, hasFinal: true });
+  // State nâng cấp cho Form thêm môn mới
+  const initialNewSub = { name: '', credits: 3, attW: 10, midW: 40, finW: 50, hasFinal: true, targetType: 'letter', target: 'A' };
+  const [newSub, setNewSub] = useState(initialNewSub);
 
   useEffect(() => {
     try {
@@ -195,8 +196,10 @@ export default function App() {
     setShowBulkAddModal(false);
   };
 
-  const handleAddSubject = () => {
+  // Hàm Thêm Môn Nâng Cấp (Hỗ trợ thêm nhiều & gán mục tiêu luôn)
+  const handleAddSubject = (keepOpen = false) => {
     if (!newSub.name.trim()) return alert("Khánh Ly nhớ nhập tên môn học nhé!");
+    
     const id = "SUB_" + Math.random().toString(36).substr(2, 9);
     const cred = Number(newSub.credits) || 0;
     const att = Number(newSub.attW) || 0;
@@ -209,9 +212,21 @@ export default function App() {
       hasFinal: newSub.hasFinal
     };
     
+    // Lưu môn học vào danh sách
     setSubjectsList(prev => [...prev, newSubject]);
-    setShowAddModal(false);
-    setNewSub({ name: '', credits: 3, attW: 10, midW: 40, finW: 50, hasFinal: true });
+    
+    // Gán ngay mục tiêu cho môn học vừa tạo
+    setScores(prev => ({
+      ...prev,
+      [id]: { attendance: '', midterm: '', final: '', targetType: newSub.targetType, target: newSub.target }
+    }));
+
+    if (keepOpen) {
+      setNewSub(initialNewSub); // Xóa form để Ly nhập tiếp
+    } else {
+      setShowAddModal(false);
+      setNewSub(initialNewSub);
+    }
   };
 
   const confirmDelete = () => {
@@ -408,7 +423,7 @@ export default function App() {
                             </button>
                           )}
                           <span className={`text-[12px] md:text-sm font-black px-4 py-2.5 rounded-xl border ${numericTarget <= 0 ? 'bg-slate-100 text-slate-400 border-slate-200' : (requiredFinal <= 0 ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : (requiredFinal > 10 ? 'bg-red-50 text-red-500 border-red-200' : 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-200'))}`}>
-                            {numericTarget <= 0 ? 'CHƯA NHẬP' : (requiredFinal <= 0 ? 'ĐÃ ĐẠT 🎉' : (requiredFinal > 10 ? 'KHÔNG THỂ ❌' : `CẦN THI ${requiredFinal.toFixed(2)}`))}
+                            {numericTarget <= 0 ? 'CHƯA NHẬP' : (requiredFinal <= 0 ? 'ĐĐ ĐẠT 🎉' : (requiredFinal > 10 ? 'KHÔNG THỂ ❌' : `CẦN THI ${requiredFinal.toFixed(2)}`))}
                           </span>
                         </div>
                       </div>
@@ -422,7 +437,7 @@ export default function App() {
 
         {/* === MODALS TÍNH NĂNG === */}
         
-        {/* MODAL CÀI ĐẶT MỤC TIÊU SANG CHẢNH - CĂN GIỮA VÀ HIỆU ỨNG TRƯỢT 100% */}
+        {/* MODAL CÀI ĐẶT MỤC TIÊU SANG CHẢNH */}
         {targetModalSubject && (() => {
            const id = targetModalSubject; 
            const s = scores[id] || {}; 
@@ -447,8 +462,6 @@ export default function App() {
                 </div>
 
                 <div className="relative h-[180px] w-full overflow-hidden">
-                  
-                  {/* Bảng Điểm Chữ - Flex Center chuẩn không rớt dòng */}
                   <div className={`absolute inset-0 transition-all duration-300 ease-out ${currentType === 'letter' ? 'opacity-100 translate-x-0 z-10 pointer-events-auto' : 'opacity-0 -translate-x-10 z-0 pointer-events-none'}`}>
                     <div className="flex flex-wrap justify-center gap-3">
                       {Object.keys(gradeScale).map(g => (
@@ -464,7 +477,6 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* Bảng Điểm Số */}
                   <div className={`absolute inset-0 transition-all duration-300 ease-out ${currentType === 'number' ? 'opacity-100 translate-x-0 z-10 pointer-events-auto' : 'opacity-0 translate-x-10 z-0 pointer-events-none'}`}>
                     <div className="flex items-center gap-5 mt-4">
                         <input 
@@ -496,7 +508,6 @@ export default function App() {
                         <span>A (10.0)</span>
                     </div>
                   </div>
-
                 </div>
 
                 <div className="bg-blue-50/60 p-5 rounded-2xl mt-4 mb-8 border border-blue-100">
@@ -516,56 +527,116 @@ export default function App() {
            );
         })()}
 
-        {/* MODAL THÊM MÔN THỦ CÔNG */}
+        {/* === MODAL THÊM MÔN CHUYÊN NGHIỆP (ĐÃ NÂNG CẤP) === */}
         {showAddModal && (
-          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
-            <div className="bg-white rounded-[32px] p-8 max-w-md w-full shadow-2xl animate-[fadeIn_0.2s_ease-out]">
-              <h3 className="text-2xl font-black mb-6 flex items-center gap-3">
-                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-                Môn mới cho Ly
-              </h3>
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-4 overflow-y-auto">
+            <div className="bg-white rounded-[32px] p-6 md:p-8 max-w-lg w-full shadow-2xl animate-[fadeIn_0.2s_ease-out] my-8">
               
-              <div className="space-y-4 mb-8">
-                <input 
-                  type="text" 
-                  placeholder="Tên môn học..." 
-                  value={newSub.name} 
-                  onChange={e => setNewSub({...newSub, name: e.target.value})} 
-                  className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold focus:outline-none focus:border-blue-500 focus:bg-white transition-colors" 
-                />
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <input 
-                    type="number" 
-                    placeholder="Số tín chỉ" 
-                    value={newSub.credits} 
-                    onChange={e => setNewSub({...newSub, credits: e.target.value})} 
-                    className="px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-center focus:outline-none focus:border-blue-500 focus:bg-white transition-colors" 
-                  />
-                  <label className="flex items-center justify-center gap-3 px-4 bg-slate-50 border-2 border-slate-100 rounded-2xl cursor-pointer hover:border-blue-300 transition-colors">
-                    <input 
-                      type="checkbox" 
-                      checked={newSub.hasFinal} 
-                      onChange={e => setNewSub({...newSub, hasFinal: e.target.checked})} 
-                      className="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500" 
-                    />
-                    <span className="text-[13px] font-bold text-slate-600 uppercase tracking-wide">Có thi CK</span>
-                  </label>
-                </div>
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl md:text-2xl font-black flex items-center gap-3 text-slate-800">
+                  <svg className="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                  Môn mới cho Ly
+                </h3>
+                <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-slate-600 p-2 bg-slate-100 rounded-full transition-colors">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
               </div>
               
-              <div className="flex gap-4">
-                <button 
-                  onClick={() => setShowAddModal(false)} 
-                  className="flex-1 py-4 font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 rounded-2xl transition-colors active:scale-95"
-                >
-                  Hủy bỏ
+              <div className="space-y-5">
+                
+                {/* Khu vực 1: Thông tin cơ bản */}
+                <div className="bg-slate-50 p-4 md:p-5 rounded-2xl border border-slate-100">
+                  <div className="mb-4">
+                    <label className="block text-[11px] font-black text-slate-400 uppercase tracking-wider mb-2 ml-1">Tên môn học</label>
+                    <input 
+                      type="text" 
+                      placeholder="VD: Triết học Mác - Lênin..." 
+                      value={newSub.name} 
+                      onChange={e => setNewSub({...newSub, name: e.target.value})} 
+                      className="w-full px-4 py-3.5 bg-white border-2 border-slate-100 rounded-xl font-bold text-slate-800 focus:outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-50 transition-all shadow-sm" 
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[11px] font-black text-slate-400 uppercase tracking-wider mb-2 ml-1">Số tín chỉ</label>
+                      <input 
+                        type="number" 
+                        value={newSub.credits} 
+                        onChange={e => setNewSub({...newSub, credits: e.target.value})} 
+                        className="w-full px-4 py-3.5 bg-white border-2 border-slate-100 rounded-xl font-bold text-center focus:outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-50 transition-all shadow-sm" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-black text-slate-400 uppercase tracking-wider mb-2 ml-1 opacity-0">Tùy chọn</label>
+                      <label className="flex items-center justify-center gap-3 px-4 py-3.5 bg-white border-2 border-slate-100 rounded-xl cursor-pointer hover:border-blue-300 transition-colors shadow-sm select-none">
+                        <input 
+                          type="checkbox" 
+                          checked={newSub.hasFinal} 
+                          onChange={e => setNewSub({...newSub, hasFinal: e.target.checked})} 
+                          className="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer" 
+                        />
+                        <span className="text-[13px] font-bold text-slate-700 uppercase tracking-wide">Có thi CK</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Khu vực 2: Trọng số */}
+                <div className="bg-slate-50 p-4 md:p-5 rounded-2xl border border-slate-100">
+                  <label className="block text-[11px] font-black text-slate-400 uppercase tracking-wider mb-3 text-center">Trọng số điểm (%)</label>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-[10px] text-slate-500 mb-1 text-center font-bold">Chuyên Cần</label>
+                      <input type="number" value={newSub.attW} onChange={e => setNewSub({...newSub, attW: e.target.value})} className="w-full border-2 border-slate-100 bg-white rounded-xl px-2 py-2.5 text-center text-sm font-bold shadow-sm focus:border-blue-400 outline-none" />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] text-slate-500 mb-1 text-center font-bold">Quá Trình</label>
+                      <input type="number" value={newSub.midW} onChange={e => setNewSub({...newSub, midW: e.target.value})} className="w-full border-2 border-slate-100 bg-white rounded-xl px-2 py-2.5 text-center text-sm font-bold shadow-sm focus:border-blue-400 outline-none" />
+                    </div>
+                    <div className={!newSub.hasFinal ? "opacity-50" : ""}>
+                      <label className="block text-[10px] text-blue-500 mb-1 text-center font-bold">Cuối Kì</label>
+                      <input type="number" disabled={!newSub.hasFinal} value={newSub.hasFinal ? newSub.finW : 0} onChange={e => setNewSub({...newSub, finW: e.target.value})} className={`w-full border-2 border-blue-100 bg-blue-50 text-blue-700 rounded-xl px-2 py-2.5 text-center text-sm font-bold shadow-sm focus:border-blue-500 outline-none ${!newSub.hasFinal ? 'bg-slate-200 border-slate-200 text-slate-400 cursor-not-allowed' : ''}`} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Khu vực 3: Mục tiêu (Tích hợp) */}
+                <div className={`bg-blue-50/50 p-4 md:p-5 rounded-2xl border border-blue-100 transition-all ${!newSub.hasFinal ? "opacity-40 pointer-events-none grayscale" : ""}`}>
+                  <div className="flex justify-between items-center mb-4">
+                     <label className="block text-[11px] font-black text-blue-600 uppercase tracking-wider">Cài đặt Mục tiêu</label>
+                     <div className="flex bg-white p-1 rounded-lg border border-slate-200 shadow-sm">
+                        <button onClick={() => setNewSub({...newSub, targetType: 'letter', target: 'A'})} className={`px-3 py-1 text-[10px] font-black rounded-md transition-all ${newSub.targetType === 'letter' ? "bg-blue-600 text-white" : "text-slate-400"}`}>CHỮ</button>
+                        <button onClick={() => setNewSub({...newSub, targetType: 'number', target: '8.5'})} className={`px-3 py-1 text-[10px] font-black rounded-md transition-all ${newSub.targetType === 'number' ? "bg-blue-600 text-white" : "text-slate-400"}`}>SỐ</button>
+                     </div>
+                  </div>
+                  
+                  {newSub.targetType === 'letter' ? (
+                     <div className="grid grid-cols-4 gap-2">
+                       {Object.keys(gradeScale).map(g => (
+                         <button key={g} onClick={() => setNewSub({...newSub, target: g})} className={`py-2 rounded-xl border-2 font-black transition-all ${newSub.target === g ? "border-blue-500 bg-white text-blue-600 shadow-sm" : "border-transparent text-slate-500 hover:bg-white/50"}`}>
+                           {g}
+                         </button>
+                       ))}
+                     </div>
+                  ) : (
+                     <div className="flex items-center gap-4">
+                        <input type="range" min="4.0" max="10.0" step="0.1" value={parseFloat(newSub.target) || 4.0} onChange={e => setNewSub({...newSub, target: parseFloat(e.target.value).toFixed(1)})} className="w-full h-2 bg-blue-100 rounded-full appearance-none cursor-pointer accent-blue-600" />
+                        <div className="w-[70px] bg-white border border-blue-200 rounded-xl shadow-sm overflow-hidden">
+                           <input type="text" inputMode="decimal" value={newSub.target} onChange={e => setNewSub({...newSub, target: e.target.value.replace(/[^0-9.]/g, '')})} onBlur={e => { let num = parseFloat(e.target.value); if(isNaN(num)) num=8.5; if(num>10) num=10; if(num<0) num=0; setNewSub({...newSub, target: num.toFixed(1)}); }} className="w-full text-center font-black text-blue-600 py-1.5 outline-none" />
+                        </div>
+                     </div>
+                  )}
+                </div>
+
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-3 mt-8">
+                <button onClick={() => handleAddSubject(true)} className="flex-1 py-4 font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-2xl transition-colors border border-blue-100 active:scale-95 flex items-center justify-center gap-2">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>
+                  Lưu & Thêm tiếp
                 </button>
-                <button 
-                  onClick={handleAddSubject} 
-                  className="flex-[1.5] py-4 font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-2xl shadow-lg shadow-blue-200 transition-all active:scale-95"
-                >
-                  + Thêm ngay
+                <button onClick={() => handleAddSubject(false)} className="flex-[1.2] py-4 font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-2xl shadow-xl transition-all active:scale-95">
+                  Xong!
                 </button>
               </div>
             </div>
