@@ -11,9 +11,9 @@ const defaultSuggestions = [
 ];
 
 const quotes = [
+  "Học xong anh dẫn đi ăn đồ Hàn nhé, Ly của anh vất vả rồi 🍲",
   "Bé iu của anh ơi, cố lên nhé! Anh luôn ở đây ủng hộ Ly. ❤️",
   "Gửi ngàn nụ hôn cho cô gái NEU giỏi giang của anh. Yêu Ly nhất! 🥰",
-  "Học xong anh dẫn đi ăn đồ Hàn nhé, Ly của anh vất vả rồi 🍲",
   "GPA NEU khó thế nào cũng không làm khó được em bé của anh đâu! 🚀",
   "Ly cứ việc học giỏi, cả thế giới cứ để anh lo. Thương em lắm! 🥺",
   "Nhìn Ly chăm chỉ mà anh thấy yêu quá, cố lên nốt môn này nha! ✨"
@@ -81,7 +81,7 @@ const CircularProgress = ({ value, mainText, subText, max, colorClass }) => {
   
   return (
     <div className="flex flex-col items-center">
-      <div className="relative flex items-center justify-center w-24 h-24 md:w-32 md:h-32 mb-3 transition-all">
+      <div className="relative flex items-center justify-center w-24 h-24 md:w-32 md:h-32 mb-3">
         <svg className="transform -rotate-90 w-full h-full absolute inset-0" viewBox="0 0 100 100">
           <circle cx="50" cy="50" r={radius} stroke="currentColor" strokeWidth="8" fill="transparent" className="text-slate-100" />
           <circle cx="50" cy="50" r={radius} stroke="currentColor" strokeWidth="8" fill="transparent" strokeDasharray={circumference} strokeDashoffset={strokeDashoffset} className={`${colorClass} transition-all duration-1000`} strokeLinecap="round" />
@@ -116,7 +116,7 @@ export default function App() {
 
   useEffect(() => {
     try {
-      const savedData = localStorage.getItem('gpa-master-v15');
+      const savedData = localStorage.getItem('gpa-master-v17');
       if (savedData) {
         const parsed = JSON.parse(savedData);
         setScores(parsed.scores || {});
@@ -136,7 +136,7 @@ export default function App() {
 
   useEffect(() => {
     if (isLoaded) {
-      localStorage.setItem('gpa-master-v15', JSON.stringify({ scores, subjectsList }));
+      localStorage.setItem('gpa-master-v17', JSON.stringify({ scores, subjectsList }));
     }
   }, [scores, subjectsList, isLoaded]);
 
@@ -166,9 +166,7 @@ export default function App() {
   
   const handleBulkDelete = () => {
     setSubjectsList(prev => prev.filter(s => !selectedIds.includes(s.id)));
-    setSelectedIds([]);
-    setShowBulkDeleteModal(false);
-    setIsSelectionMode(false);
+    setSelectedIds([]); setShowBulkDeleteModal(false); setIsSelectionMode(false);
   };
 
   const handleBulkAdd = (items) => {
@@ -213,98 +211,91 @@ export default function App() {
   });
   const gpa = totalCredits > 0 ? (totalPoints / totalCredits).toFixed(2) : "0.00";
 
-  if (!isLoaded) return <div className="min-h-screen bg-[#f1f5f9]"></div>;
+  if (!isLoaded) return <div className="min-h-screen bg-[#f4f7f9]"></div>;
 
   return (
-    <div className="min-h-screen bg-[#f1f5f9] font-sans text-slate-800 flex justify-center p-0 md:p-6">
-      <div className="w-full max-w-[1200px] bg-white md:rounded-[32px] shadow-2xl flex flex-col md:flex-row min-h-screen md:min-h-[90vh] md:overflow-hidden">
+    <div className="min-h-screen bg-[#f4f7f9] font-sans text-slate-800 flex justify-center p-0 md:p-6">
+      <div className="w-full max-w-[1400px] bg-white md:rounded-[32px] shadow-sm flex flex-col md:flex-row min-h-screen md:min-h-[90vh] md:overflow-hidden border-0 md:border border-slate-200">
         
         {/* === SIDEBAR === */}
         <div className="w-full md:w-[320px] bg-[#f8fafc] border-b md:border-b-0 md:border-r border-slate-200 p-6 flex flex-col shrink-0">
           <div className="flex items-center gap-3 mb-6 md:mb-10">
             <span className="text-3xl">🚀</span>
-            <h1 className="text-2xl font-black bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent opacity-90">GPA MASTER</h1>
+            <h1 className="text-2xl font-black text-blue-600">GPA MASTER</h1>
           </div>
           
-          <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm mb-6 flex-1 flex flex-col justify-center">
-            <div className="flex flex-row md:flex-col justify-around items-center w-full gap-2 md:gap-8">
+          <div className="bg-white rounded-[28px] p-6 border border-slate-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] mb-6 flex-1 flex flex-col justify-center">
+            <div className="flex flex-row md:flex-col justify-around items-center w-full gap-4 md:gap-10">
               <CircularProgress value={completedCount} mainText={`${completedCount}/${subjectsList.length}`} subText="Tiến độ" max={subjectsList.length || 1} colorClass="text-emerald-500" />
-              <div className="h-12 w-px md:w-20 md:h-px bg-slate-200" />
+              <div className="h-16 w-px md:w-24 md:h-px bg-slate-100" />
               <CircularProgress value={gpa} mainText={gpa} subText="GPA Hệ 4" max={4.0} colorClass="text-blue-600" />
             </div>
           </div>
 
-          <div className="mt-auto bg-blue-600 rounded-3xl p-6 text-white shadow-lg shadow-blue-200">
-             <div className="flex items-center gap-2 mb-3 opacity-80">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd"></path></svg>
-              <span className="text-[12px] font-bold uppercase tracking-wider">Gửi Khánh Ly</span>
+          <div className="mt-auto bg-blue-500 rounded-[28px] p-6 text-white shadow-lg shadow-blue-200/50">
+             <div className="flex items-center gap-2 opacity-90">
+              <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd"></path></svg>
+              <span className="text-[12px] font-black uppercase tracking-wider">Gửi Khánh Ly</span>
              </div>
              <TypingText text={quote} />
           </div>
         </div>
 
         {/* === MAIN CONTENT === */}
-        <div className="flex-1 flex flex-col bg-[#fcfcfc] relative">
+        <div className="flex-1 flex flex-col h-full bg-[#fcfcfc] relative">
           
-          <div className="sticky top-0 z-30 bg-white/90 backdrop-blur-md px-4 md:px-8 py-4 border-b border-slate-200 flex flex-row justify-between items-center gap-2">
-            <div className="flex flex-col">
-              <h2 className="text-lg md:text-2xl font-bold">Môn học của Ly</h2>
-            </div>
+          <div className="sticky top-0 z-30 bg-white/90 backdrop-blur-md px-6 md:px-10 py-5 border-b border-slate-100 flex flex-row justify-between items-center">
+            <h2 className="text-xl md:text-2xl font-black text-slate-800">Môn học của Ly</h2>
             
-            <div className="flex items-center gap-2">
-              {subjectsList.length > 0 && (
-                <button 
-                  onClick={toggleSelectMode}
-                  className={`px-4 py-2.5 rounded-xl font-bold text-sm transition-all shadow-sm active:scale-95 ${isSelectionMode ? 'bg-slate-800 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}
-                >
-                  {isSelectionMode ? 'Xong' : 'Chỉnh sửa'}
+            <div className="flex items-center gap-3">
+              {subjectsList.length > 0 && !isSelectionMode && (
+                <button onClick={toggleSelectMode} className="px-4 py-2.5 rounded-xl font-bold text-sm bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors shadow-sm">
+                  Chỉnh sửa
                 </button>
+              )}
+              {isSelectionMode && (
+                <button onClick={toggleSelectMode} className="px-4 py-2.5 rounded-xl font-bold text-sm bg-slate-800 text-white transition-colors shadow-sm">
+                  Xong
+                </button>
+              )}
+              
+              {!isSelectionMode ? (
+                <>
+                  <button onClick={() => setShowBulkAddModal(true)} className="bg-blue-50 text-blue-600 px-4 py-2.5 rounded-xl font-bold text-sm transition-colors whitespace-nowrap hover:bg-blue-100 flex items-center gap-2">
+                    <span className="text-orange-500">⚡</span> <span className="hidden md:inline">Nạp nhanh</span>
+                  </button>
+                  <button onClick={() => setShowAddModal(true)} className="bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-md transition-all active:scale-95 whitespace-nowrap hover:bg-blue-700">
+                    + Thêm môn<span className="hidden md:inline"> mới</span>
+                  </button>
+                </>
+              ) : (
+                <>
+                  {selectedIds.length > 0 && (
+                    <button onClick={() => setShowBulkDeleteModal(true)} className="bg-red-500 text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition-all active:scale-95 hover:bg-red-600 shadow-md shadow-red-200/50">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                      Xóa <span className="hidden md:inline">{selectedIds.length} môn</span>
+                    </button>
+                  )}
+                </>
               )}
             </div>
           </div>
 
-          <div className={`overflow-hidden transition-all duration-300 ${isSelectionMode ? 'max-h-[80px] border-b border-slate-200 bg-slate-50/50' : 'max-h-0'}`}>
-             <div className="px-4 md:px-8 py-3 flex items-center justify-between">
+          <div className={`overflow-hidden transition-all duration-300 ${isSelectionMode ? 'max-h-[60px] bg-slate-50 border-b border-slate-100' : 'max-h-0'}`}>
+             <div className="px-6 md:px-10 py-3 flex items-center">
                 <button onClick={selectAll} className="flex items-center gap-3 outline-none group cursor-pointer">
-                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${selectedIds.length === subjectsList.length && subjectsList.length > 0 ? 'bg-blue-600 border-blue-600' : 'border-slate-300 group-hover:border-blue-400'}`}>
-                    {selectedIds.length === subjectsList.length && subjectsList.length > 0 && <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>}
+                  <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${selectedIds.length === subjectsList.length && subjectsList.length > 0 ? 'bg-blue-600 border-blue-600' : 'border-slate-300 bg-white'}`}>
+                    {selectedIds.length === subjectsList.length && subjectsList.length > 0 && <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7" /></svg>}
                   </div>
                   <span className="text-sm font-bold text-slate-600">Chọn tất cả</span>
                 </button>
-                
-                {selectedIds.length > 0 && (
-                  <button 
-                    onClick={() => setShowBulkDeleteModal(true)} 
-                    className="bg-red-50 text-red-600 px-4 py-2 rounded-xl font-bold text-sm border border-red-100 flex items-center gap-2 transition-all active:scale-95 hover:bg-red-100"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                    Xóa {selectedIds.length} môn
-                  </button>
-                )}
              </div>
           </div>
 
-          <div className={`overflow-hidden transition-all duration-300 ${!isSelectionMode ? 'max-h-[80px]' : 'max-h-0'}`}>
-             <div className="px-4 md:px-8 py-4 flex items-center justify-end gap-3">
-                <button 
-                  onClick={() => setShowBulkAddModal(true)} 
-                  className="bg-blue-50 text-blue-600 px-4 py-2.5 rounded-xl font-bold text-sm border border-blue-100 transition-all active:scale-95 whitespace-nowrap hover:bg-blue-100"
-                >
-                  ⚡ Nạp nhanh
-                </button>
-                <button 
-                  onClick={() => setShowAddModal(true)} 
-                  className="bg-blue-600 text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow-md transition-all active:scale-95 whitespace-nowrap hover:bg-blue-700"
-                >
-                  + Thêm môn mới
-                </button>
-             </div>
-          </div>
-
-          {/* Danh sách */}
-          <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 pb-20 custom-scroll">
+          {/* === DANH SÁCH MÔN HỌC CHUẨN DESIGN === */}
+          <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 pb-24 custom-scroll bg-[#fcfcfc]">
             {subjectsList.length === 0 && (
-               <div className="text-center mt-10 text-slate-400 font-medium">Chưa có môn học nào, Ly thêm môn mới nhé!</div>
+               <div className="text-center mt-20 text-slate-400 font-medium">Chưa có môn học nào, Ly thêm môn mới nhé!</div>
             )}
 
             {subjectsList.map(sub => {
@@ -321,20 +312,20 @@ export default function App() {
               return (
                 <div 
                   key={sub.id} 
-                  className={`bg-white rounded-3xl p-5 border-2 transition-all duration-300 flex items-start gap-4 ${isSelected ? 'border-blue-500 shadow-md bg-blue-50/30' : 'border-slate-100 shadow-sm'} ${isSelectionMode ? 'cursor-pointer hover:border-blue-300' : ''}`}
+                  className={`bg-white rounded-[24px] p-5 md:p-7 transition-all duration-300 flex items-start gap-4 ${isSelected ? 'border-2 border-blue-500 shadow-md bg-blue-50/20' : 'border border-slate-200 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] hover:shadow-lg'} ${isSelectionMode ? 'cursor-pointer hover:border-blue-400' : ''}`}
                   onClick={() => isSelectionMode && toggleSelect(sub.id)}
                 >
-                  <div className={`overflow-hidden transition-all duration-300 flex items-center justify-center pt-1 ${isSelectionMode ? 'w-8 opacity-100' : 'w-0 opacity-0'}`}>
-                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${isSelected ? 'bg-blue-600 border-blue-600' : 'border-slate-300'}`}>
-                      {isSelected && <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>}
+                  <div className={`overflow-hidden transition-all duration-300 flex items-center justify-center pt-1.5 ${isSelectionMode ? 'w-6 opacity-100 mr-2' : 'w-0 opacity-0 mr-0'}`}>
+                    <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${isSelected ? 'bg-blue-600 border-blue-600' : 'border-slate-300 bg-white'}`}>
+                      {isSelected && <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7" /></svg>}
                     </div>
                   </div>
                   
                   <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-start mb-4">
+                    <div className="flex justify-between items-start mb-6">
                       <div>
-                        <h4 className="font-bold text-[16px] md:text-lg text-slate-800 pr-2">{sub.name}</h4>
-                        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">{sub.credits} Tín chỉ</p>
+                        <h4 className="font-black text-lg md:text-xl text-slate-800 mb-1 pr-2 leading-tight">{sub.name}</h4>
+                        <p className="text-[11px] md:text-[12px] font-bold text-slate-400 uppercase tracking-widest">{sub.credits} Tín chỉ</p>
                       </div>
                       {!isSelectionMode && (
                         <button onClick={(e) => { e.stopPropagation(); setSubjectToDelete(sub); }} className="text-slate-300 hover:text-red-500 hover:bg-red-50 p-2 rounded-xl transition-colors shrink-0">
@@ -343,50 +334,63 @@ export default function App() {
                       )}
                     </div>
 
-                    <div className={`grid grid-cols-3 gap-2 md:gap-4 mb-4 transition-opacity ${isSelectionMode ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+                    <div className={`grid grid-cols-3 gap-2 md:gap-5 mb-5 md:mb-6 transition-opacity ${isSelectionMode ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
                       <div>
-                        <label className="block text-[10px] md:text-xs font-black text-slate-400 uppercase mb-1 ml-1 truncate">Chuyên cần</label>
+                        <label className="block text-[9px] md:text-[11px] font-black text-slate-400 uppercase tracking-wider mb-2 ml-1 truncate">C.Cần ({sub.weights.attendance * 100}%)</label>
                         <input type="text" inputMode="decimal" value={s.attendance || ''} onChange={e => updateScore(sub.id, 'attendance', e.target.value)} 
-                          className="w-full text-center py-2 rounded-xl font-bold text-sm border-2 bg-slate-50 border-slate-100 focus:border-blue-400 focus:outline-none transition-all" />
+                          className="w-full text-center py-2.5 md:py-4 rounded-xl font-bold text-sm md:text-base border border-slate-100 bg-slate-50 focus:bg-white focus:border-blue-400 focus:outline-none focus:ring-4 focus:ring-blue-50 transition-all" />
                       </div>
                       <div>
-                        <label className="block text-[10px] md:text-xs font-black text-slate-400 uppercase mb-1 ml-1 truncate">Quá trình</label>
+                        <label className="block text-[9px] md:text-[11px] font-black text-slate-400 uppercase tracking-wider mb-2 ml-1 truncate">Q.Trình ({sub.weights.midterm * 100}%)</label>
                         <input type="text" inputMode="decimal" value={s.midterm || ''} onChange={e => updateScore(sub.id, 'midterm', e.target.value)} 
-                          className="w-full text-center py-2 rounded-xl font-bold text-sm border-2 bg-slate-50 border-slate-100 focus:border-blue-400 focus:outline-none transition-all" />
+                          className="w-full text-center py-2.5 md:py-4 rounded-xl font-bold text-sm md:text-base border border-slate-100 bg-slate-50 focus:bg-white focus:border-blue-400 focus:outline-none focus:ring-4 focus:ring-blue-50 transition-all" />
                       </div>
                       {sub.hasFinal ? (
                         <div>
-                          <label className="block text-[10px] md:text-xs font-black text-blue-500 uppercase mb-1 ml-1 truncate">Cuối kì</label>
+                          <label className="block text-[9px] md:text-[11px] font-black text-blue-600 uppercase tracking-wider mb-2 ml-1 truncate">Cuối kì ({sub.weights.final * 100}%)</label>
                           <input type="text" inputMode="decimal" value={s.final || ''} onChange={e => updateScore(sub.id, 'final', e.target.value)} 
-                            className="w-full text-center py-2 rounded-xl font-bold text-sm border-2 bg-blue-50 border-blue-100 text-blue-600 focus:border-blue-500 focus:outline-none transition-all" />
+                            className="w-full text-center py-2.5 md:py-4 rounded-xl font-black text-sm md:text-base border border-blue-100 bg-blue-50/50 text-blue-700 focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all" />
                         </div>
                       ) : (
                         <div className="flex flex-col justify-end">
-                           <div className="bg-slate-50 rounded-2xl h-[40px] flex items-center justify-center border border-slate-100">
-                             <span className="text-[10px] font-bold text-slate-300 uppercase">Ko thi CK</span>
+                           <div className="bg-slate-50 rounded-xl h-[44px] md:h-[58px] flex items-center justify-center border border-slate-100">
+                             <span className="text-[10px] md:text-[11px] font-bold text-slate-400 uppercase">Ko thi CK</span>
                            </div>
                         </div>
                       )}
                     </div>
 
+                    {/* === KHU VỰC MỤC TIÊU NỔI BẬT THEO DESIGN ĐÃ TỐI ƯU MOBILE === */}
                     {sub.hasFinal && (
-                      <div className={`flex flex-col md:flex-row md:items-center justify-between bg-slate-50 rounded-2xl p-3 border border-slate-100 gap-3 transition-opacity ${isSelectionMode ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
-                        <button onClick={(e) => { e.stopPropagation(); setTargetModalSubject(sub.id); }} className="flex flex-col text-left hover:opacity-80 transition-opacity">
-                          <span className="text-[9px] font-black text-slate-400 uppercase tracking-wide">Mục tiêu hiện tại</span>
-                          <span className="text-xs font-bold text-blue-600">
-                            {targetType === 'letter' ? `Điểm ${targetVal} (${gradeScale[targetVal]})` : `${targetVal} Hệ 10`}
-                            <span className="ml-1 text-[10px]">⚙️</span>
-                          </span>
-                        </button>
-                        <div className="flex items-center gap-2 justify-end">
+                      <div className={`flex flex-col md:flex-row md:items-center justify-between bg-slate-50/80 rounded-[20px] p-4 md:p-5 border border-slate-100 gap-3 md:gap-4 transition-opacity ${isSelectionMode ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+                        
+                        <div className="flex flex-col text-left mb-1 md:mb-0">
+                          <span className="text-[10px] md:text-[11px] font-black text-slate-400 uppercase tracking-wider mb-1">Mục tiêu hiện tại</span>
+                          <button onClick={(e) => { e.stopPropagation(); setTargetModalSubject(sub.id); }} className="flex items-center gap-2 group outline-none w-fit">
+                            <span className="text-[14px] md:text-[17px] font-black text-blue-600 group-hover:text-blue-700 transition-colors">
+                              {targetType === 'letter' ? `Điểm ${targetVal} (${gradeScale[targetVal].toFixed(1)})` : `${targetVal} Hệ 10`}
+                            </span>
+                            <span className="text-[12px] opacity-60 group-hover:opacity-100 transition-opacity">⚙️</span>
+                          </button>
+                        </div>
+                        
+                        <div className="flex flex-row items-center justify-end gap-2 md:gap-3 w-full md:w-auto mt-1 md:mt-0">
                           {requiredFinal > 0 && requiredFinal <= 10 && numericTarget > 0 && (
-                            <button onClick={(e) => { e.stopPropagation(); updateScore(sub.id, 'final', requiredFinal.toFixed(2)); }} className="bg-white text-[10px] md:text-xs font-black text-blue-500 px-3 py-2 rounded-xl border border-blue-100 shadow-sm active:scale-95 transition-all">
+                            <button onClick={(e) => { e.stopPropagation(); updateScore(sub.id, 'final', requiredFinal.toFixed(2)); }} className="bg-white text-[10px] md:text-[12px] font-black text-blue-500 px-3 md:px-5 py-2.5 md:py-3 rounded-xl border border-slate-200 shadow-sm active:scale-95 transition-all hover:border-blue-300 hover:text-blue-600 whitespace-nowrap">
                               ⚡ TỰ ĐIỀN
                             </button>
                           )}
-                          <span className={`text-[11px] md:text-xs font-black px-3 py-2 rounded-xl border ${numericTarget <= 0 ? 'bg-slate-100 text-slate-400 border-slate-200' : (requiredFinal <= 0 ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : (requiredFinal > 10 ? 'bg-red-50 text-red-500 border-red-100' : 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-100'))}`}>
-                            {numericTarget <= 0 ? 'CHƯA NHẬP' : (requiredFinal <= 0 ? 'ĐĐ ĐẠT 🎉' : (requiredFinal > 10 ? 'KHÔNG THỂ ❌' : `CẦN THI ${requiredFinal.toFixed(2)}`))}
-                          </span>
+                          
+                          {/* NÚT KẾT QUẢ ĐƯỢC LÀM KHỐI ĐẶC CỰC KỲ NỔI BẬT */}
+                          {numericTarget <= 0 ? (
+                             <div className="text-[11px] md:text-[13px] font-black px-4 md:px-5 py-2.5 md:py-3 rounded-xl bg-slate-200 text-slate-500 whitespace-nowrap">CHƯA NHẬP</div>
+                          ) : requiredFinal <= 0 ? (
+                             <div className="text-[11px] md:text-[13px] font-black px-4 md:px-5 py-2.5 md:py-3 rounded-xl bg-emerald-500 text-white shadow-md shadow-emerald-200 whitespace-nowrap">ĐÃ ĐẠT 🎉</div>
+                          ) : requiredFinal > 10 ? (
+                             <div className="text-[11px] md:text-[13px] font-black px-4 md:px-5 py-2.5 md:py-3 rounded-xl bg-red-50 text-red-500 border border-red-100 whitespace-nowrap">KHÔNG THỂ ❌</div>
+                          ) : (
+                             <div className="text-[11px] md:text-[13px] font-black px-4 md:px-5 py-2.5 md:py-3 rounded-xl bg-blue-600 text-white shadow-md shadow-blue-200 whitespace-nowrap">CẦN THI {requiredFinal.toFixed(2)}</div>
+                          )}
                         </div>
                       </div>
                     )}
@@ -397,9 +401,9 @@ export default function App() {
           </div>
         </div>
 
-        {/* === MODALS TÍNH NĂNG === */}
+        {/* === MODALS === */}
         
-        {/* MODAL CÀI ĐẶT MỤC TIÊU SANG CHẢNH - ĐÃ NÂNG CẤP V16 GIAO DIỆN CHUẨN ĐÉT */}
+        {/* MODAL CÀI ĐẶT MỤC TIÊU */}
         {targetModalSubject && (() => {
            const id = targetModalSubject; 
            const s = scores[id] || {}; 
@@ -407,59 +411,52 @@ export default function App() {
            const currentVal = s.target || 'A';
            
            return (
-            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-end md:items-center justify-center p-0 md:p-4">
-              <div className="bg-white rounded-t-[40px] md:rounded-[32px] p-6 md:p-8 w-full max-w-lg shadow-2xl animate-[slideUp_0.3s_ease-out]">
-                
-                <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-6 md:hidden"></div>
+            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-end md:items-center justify-center p-0 md:p-4">
+              <div className="bg-white rounded-t-[40px] md:rounded-[32px] p-6 md:p-10 w-full max-w-lg shadow-2xl animate-[slideUp_0.3s_ease-out]">
+                <div className="w-16 h-1.5 bg-slate-200 rounded-full mx-auto mb-8 md:hidden"></div>
 
-                <div className="flex justify-between items-center mb-8 border-b border-slate-100 pb-4">
+                <div className="flex justify-between items-center mb-10 pb-6 border-b border-slate-100">
                   <div>
-                    <h3 className="text-xl font-black text-slate-800">Đặt Mục Tiêu</h3>
-                    <p className="text-[12px] font-bold text-slate-400 mt-1 truncate max-w-[200px]">{subjectsList.find(sub => sub.id === id)?.name}</p>
+                    <h3 className="text-2xl font-black text-slate-800">Đặt Mục Tiêu</h3>
+                    <p className="text-[13px] font-bold text-slate-400 mt-1 truncate max-w-[200px]">{subjectsList.find(sub => sub.id === id)?.name}</p>
                   </div>
-                  <div className="flex bg-slate-100 p-1.5 rounded-2xl border border-slate-200 shadow-inner">
-                    <button onClick={() => updateScore(id, 'targetType', 'letter')} className={`px-4 py-2 text-xs font-black rounded-xl transition-all ${currentType === 'letter' ? "bg-white text-blue-600 shadow-sm" : "text-slate-400"}`}>CHỮ</button>
-                    <button onClick={() => updateScore(id, 'targetType', 'number')} className={`px-4 py-2 text-xs font-black rounded-xl transition-all ${currentType === 'number' ? "bg-white text-blue-600 shadow-sm" : "text-slate-400"}`}>SỐ</button>
+                  <div className="relative flex bg-slate-100 p-1.5 rounded-2xl border border-slate-200 shadow-inner w-[140px]">
+                    <div className={`absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] bg-white rounded-xl shadow-sm transition-transform duration-300 ease-in-out z-0 ${currentType === 'letter' ? 'translate-x-0' : 'translate-x-[calc(100%+4px)]'}`}></div>
+                    <button onClick={() => updateScore(id, 'targetType', 'letter')} className={`relative z-10 flex-1 py-2 text-xs font-black rounded-xl transition-colors duration-300 ${currentType === 'letter' ? "text-blue-600" : "text-slate-400 hover:text-slate-600"}`}>CHỮ</button>
+                    <button onClick={() => updateScore(id, 'targetType', 'number')} className={`relative z-10 flex-1 py-2 text-xs font-black rounded-xl transition-colors duration-300 ${currentType === 'number' ? "text-blue-600" : "text-slate-400 hover:text-slate-600"}`}>SỐ</button>
                   </div>
                 </div>
 
-                <div className="min-h-[140px] w-full relative overflow-hidden">
-                  
-                  {/* Bảng Điểm Chữ - Flex Center chuẩn không rớt dòng */}
+                <div className="relative h-[180px] w-full overflow-hidden">
                   <div className={`absolute inset-0 transition-all duration-300 ease-out ${currentType === 'letter' ? 'opacity-100 translate-x-0 z-10 pointer-events-auto' : 'opacity-0 -translate-x-10 z-0 pointer-events-none'}`}>
                     <div className="flex flex-wrap justify-center gap-3">
                       {Object.keys(gradeScale).map(g => (
-                        <button 
-                          key={g} 
-                          onClick={() => updateScore(id, 'target', g)} 
-                          className={`flex flex-col items-center justify-center w-[72px] h-[72px] rounded-2xl border-2 font-black transition-all ${currentVal === g ? "border-blue-500 bg-blue-50 text-blue-600 shadow-md ring-2 ring-blue-100 scale-105" : "border-slate-100 text-slate-400 hover:border-blue-200"}`}
-                        >
+                        <button key={g} onClick={() => updateScore(id, 'target', g)} className={`flex flex-col items-center justify-center w-[72px] sm:w-[86px] h-[76px] rounded-[20px] border-2 font-black transition-all ${currentVal === g ? "border-blue-500 bg-blue-50 text-blue-600 shadow-md ring-4 ring-blue-50 scale-105" : "border-slate-100 text-slate-400 hover:border-blue-200 hover:bg-slate-50"}`}>
                           <div className="text-2xl leading-none">{g}</div>
-                          <div className="text-[10px] uppercase mt-1 opacity-70">({gradeScale[g]})</div>
+                          <div className="text-[11px] mt-2 opacity-70 font-bold">({gradeScale[g].toFixed(1)})</div>
                         </button>
                       ))}
                     </div>
                   </div>
 
-                  {/* Bảng Điểm Số */}
                   <div className={`absolute inset-0 transition-all duration-300 ease-out ${currentType === 'number' ? 'opacity-100 translate-x-0 z-10 pointer-events-auto' : 'opacity-0 translate-x-10 z-0 pointer-events-none'}`}>
-                    <div className="flex items-center gap-4 mb-4">
-                        <input type="range" min="4.0" max="10.0" step="0.1" value={parseFloat(currentVal) || 4.0} onChange={e => updateScore(id, 'target', parseFloat(e.target.value).toFixed(1))} className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600 Shadow-inner" />
-                        <div className="w-[100px] p-2 bg-blue-50 border border-blue-200 rounded-2xl shadow-inner shrink-0">
+                    <div className="flex items-center gap-6 mt-4">
+                        <input type="range" min="4.0" max="10.0" step="0.1" value={parseFloat(currentVal) || 4.0} onChange={e => updateScore(id, 'target', parseFloat(e.target.value).toFixed(1))} className="w-full h-3 bg-slate-200 rounded-full appearance-none cursor-pointer accent-blue-600" />
+                        <div className="w-[120px] p-2 bg-white border-2 border-blue-200 rounded-2xl shadow-sm shrink-0 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-50 transition-all">
                           <input type="text" inputMode="decimal" value={currentVal} onChange={e => updateScore(id, 'target', e.target.value)} onBlur={e => { let num = parseFloat(e.target.value); if (isNaN(num)) num = 8.5; if (num > 10) num = 10.0; if (num < 0) num = 0.0; updateScore(id, 'target', num.toFixed(1)); }} className="w-full bg-transparent text-center text-4xl font-black text-blue-600 outline-none py-1" />
                         </div>
                     </div>
-                    <div className="flex justify-between text-[11px] text-slate-400 px-1 font-bold">
+                    <div className="flex justify-between text-[12px] text-slate-400 px-2 mt-6 font-bold uppercase tracking-wider">
                         <span>D (4.0)</span><span>B (7.0)</span><span>A (10.0)</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-blue-50/50 p-4 md:p-5 rounded-2xl mt-4 mb-8 border border-blue-100">
-                  <p className="text-blue-700 text-sm font-bold text-center leader-relaxed">"{currentType === 'letter' ? gradeDescriptions[currentVal] : 'Bé cố gắng đạt con số này nhé, qua môn dễ ẹc!'}"</p>
+                <div className="bg-slate-50 p-5 rounded-2xl mt-4 mb-8 border border-slate-100">
+                  <p className="text-blue-600 text-sm font-bold text-center">"{currentType === 'letter' ? gradeDescriptions[currentVal] : 'Bé cố gắng đạt con số này nhé, qua môn dễ ẹc!'}"</p>
                 </div>
                 
-                <button onClick={() => setTargetModalSubject(null)} className="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white font-black rounded-2xl shadow-xl active:scale-95 transition-all">
+                <button onClick={() => setTargetModalSubject(null)} className="w-full py-4 md:py-5 bg-slate-800 hover:bg-slate-900 text-white font-black text-[15px] rounded-2xl shadow-lg active:scale-95 transition-all">
                   XÁC NHẬN XONG
                 </button>
               </div>
@@ -469,28 +466,95 @@ export default function App() {
 
         {/* MODAL THÊM MÔN THỦ CÔNG */}
         {showAddModal && (
-          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
-            <div className="bg-white rounded-[32px] p-8 max-w-md w-full shadow-2xl animate-[fadeIn_0.2s_ease-out]">
-              <h3 className="text-xl font-black mb-6 flex items-center gap-2">
-                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-                Môn mới cho Ly
-              </h3>
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 overflow-y-auto">
+            <div className="bg-white rounded-[32px] p-6 md:p-8 max-w-lg w-full shadow-2xl animate-[fadeIn_0.2s_ease-out] my-8">
               
-              <div className="space-y-4 mb-8">
-                <input type="text" placeholder="Tên môn học..." value={newSub.name} onChange={e => setNewSub({...newSub, name: e.target.value})} className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold focus:outline-none focus:border-blue-500 transition-colors" />
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <input type="number" placeholder="Tín chỉ" value={newSub.credits} onChange={e => setNewSub({...newSub, credits: e.target.value})} className="px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-center" />
-                  <label className="flex items-center justify-center gap-3 px-4 bg-slate-50 border-2 border-slate-100 rounded-2xl cursor-pointer">
-                    <input type="checkbox" checked={newSub.hasFinal} onChange={e => setNewSub({...newSub, hasFinal: e.target.checked})} className="w-5 h-5 rounded border-slate-300 text-blue-600 Focus:ring-blue-500" />
-                    <span className="text-xs font-bold text-slate-500">Có thi CK</span>
-                  </label>
-                </div>
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl md:text-2xl font-black flex items-center gap-3 text-slate-800">
+                  <svg className="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                  Môn mới cho Ly
+                </h3>
               </div>
               
-              <div className="flex gap-4">
-                <button onClick={() => setShowAddModal(false)} className="flex-1 py-4 font-bold text-slate-400 bg-slate-100 rounded-2xl">Hủy</button>
-                <button onClick={handleAddSubject} className="flex-1 py-4 font-bold text-white bg-blue-600 rounded-2xl shadow-lg shadow-blue-200 active:scale-95 transition-all">Thêm ngay</button>
+              <div className="space-y-5">
+                <div className="bg-slate-50 p-4 md:p-5 rounded-2xl border border-slate-100">
+                  <div className="mb-4">
+                    <label className="block text-[11px] font-black text-slate-400 uppercase tracking-wider mb-2 ml-1">Tên môn học</label>
+                    <input type="text" placeholder="VD: Triết học Mác - Lênin..." value={newSub.name} onChange={e => setNewSub({...newSub, name: e.target.value})} className="w-full px-4 py-3.5 bg-white border border-slate-200 rounded-xl font-bold text-slate-800 focus:outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-50 transition-all shadow-sm" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[11px] font-black text-slate-400 uppercase tracking-wider mb-2 ml-1">Số tín chỉ</label>
+                      <input type="number" value={newSub.credits} onChange={e => setNewSub({...newSub, credits: e.target.value})} className="w-full px-4 py-3.5 bg-white border border-slate-200 rounded-xl font-bold text-center focus:outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-50 transition-all shadow-sm" />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-black text-slate-400 uppercase tracking-wider mb-2 ml-1 opacity-0">Tùy chọn</label>
+                      <label className="flex items-center justify-center gap-3 px-4 py-3.5 bg-white border border-slate-200 rounded-xl cursor-pointer hover:border-blue-300 transition-colors shadow-sm select-none">
+                        <input type="checkbox" checked={newSub.hasFinal} onChange={e => setNewSub({...newSub, hasFinal: e.target.checked})} className="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer" />
+                        <span className="text-[13px] font-bold text-slate-700 uppercase tracking-wide">Có thi CK</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-slate-50 p-4 md:p-5 rounded-2xl border border-slate-100">
+                  <label className="block text-[11px] font-black text-slate-400 uppercase tracking-wider mb-3 text-center">Trọng số điểm (%)</label>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-[10px] text-slate-500 mb-1 text-center font-bold">Chuyên Cần</label>
+                      <input type="number" value={newSub.attW} onChange={e => setNewSub({...newSub, attW: e.target.value})} className="w-full border border-slate-200 bg-white rounded-xl px-2 py-2.5 text-center text-sm font-bold shadow-sm focus:border-blue-400 outline-none" />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] text-slate-500 mb-1 text-center font-bold">Quá Trình</label>
+                      <input type="number" value={newSub.midW} onChange={e => setNewSub({...newSub, midW: e.target.value})} className="w-full border border-slate-200 bg-white rounded-xl px-2 py-2.5 text-center text-sm font-bold shadow-sm focus:border-blue-400 outline-none" />
+                    </div>
+                    <div className={!newSub.hasFinal ? "opacity-50" : ""}>
+                      <label className="block text-[10px] text-blue-500 mb-1 text-center font-bold">Cuối Kì</label>
+                      <input type="number" disabled={!newSub.hasFinal} value={newSub.hasFinal ? newSub.finW : 0} onChange={e => setNewSub({...newSub, finW: e.target.value})} className={`w-full border border-blue-200 bg-blue-50 text-blue-700 rounded-xl px-2 py-2.5 text-center text-sm font-bold shadow-sm focus:border-blue-500 outline-none ${!newSub.hasFinal ? 'bg-slate-200 border-slate-200 text-slate-400 cursor-not-allowed' : ''}`} />
+                    </div>
+                  </div>
+                </div>
+
+                <div className={`bg-blue-50 p-4 md:p-5 rounded-2xl border border-blue-100 transition-all ${!newSub.hasFinal ? "opacity-40 pointer-events-none grayscale" : ""}`}>
+                  <div className="flex justify-between items-center mb-4">
+                     <label className="block text-[11px] font-black text-blue-600 uppercase tracking-wider">Cài đặt Mục tiêu</label>
+                     <div className="flex bg-white p-1 rounded-lg border border-slate-200 shadow-sm">
+                        <button onClick={() => setNewSub({...newSub, targetType: 'letter', target: 'A'})} className={`px-3 py-1 text-[10px] font-black rounded-md transition-all ${newSub.targetType === 'letter' ? "bg-blue-600 text-white" : "text-slate-400"}`}>CHỮ</button>
+                        <button onClick={() => setNewSub({...newSub, targetType: 'number', target: '8.5'})} className={`px-3 py-1 text-[10px] font-black rounded-md transition-all ${newSub.targetType === 'number' ? "bg-blue-600 text-white" : "text-slate-400"}`}>SỐ</button>
+                     </div>
+                  </div>
+                  
+                  {newSub.targetType === 'letter' ? (
+                     <div className="grid grid-cols-4 gap-2">
+                       {Object.keys(gradeScale).map(g => (
+                         <button key={g} onClick={() => setNewSub({...newSub, target: g})} className={`py-2.5 rounded-xl border-2 font-black transition-all ${newSub.target === g ? "border-blue-500 bg-white text-blue-600 shadow-sm" : "border-transparent text-slate-500 hover:bg-white/50"}`}>
+                           {g}
+                         </button>
+                       ))}
+                     </div>
+                  ) : (
+                     <div className="flex items-center gap-4">
+                        <input type="range" min="4.0" max="10.0" step="0.1" value={parseFloat(newSub.target) || 4.0} onChange={e => setNewSub({...newSub, target: parseFloat(e.target.value).toFixed(1)})} className="w-full h-2 bg-blue-200 rounded-full appearance-none cursor-pointer accent-blue-600" />
+                        <div className="w-[70px] bg-white border border-blue-200 rounded-xl shadow-sm overflow-hidden">
+                           <input type="text" inputMode="decimal" value={newSub.target} onChange={e => setNewSub({...newSub, target: e.target.value.replace(/[^0-9.]/g, '')})} onBlur={e => { let num = parseFloat(e.target.value); if(isNaN(num)) num=8.5; if(num>10) num=10; if(num<0) num=0; setNewSub({...newSub, target: num.toFixed(1)}); }} className="w-full text-center font-black text-blue-600 py-1.5 outline-none" />
+                        </div>
+                     </div>
+                  )}
+                </div>
+
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-3 mt-8">
+                <button onClick={() => setShowAddModal(false)} className="flex-1 py-4 font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 rounded-2xl transition-colors border border-slate-100 active:scale-95 flex items-center justify-center gap-2">
+                  Đóng
+                </button>
+                <button onClick={() => handleAddSubject(true)} className="flex-[1.2] py-4 font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-2xl transition-colors border border-blue-100 active:scale-95 flex items-center justify-center gap-2">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>
+                  Lưu & Thêm tiếp
+                </button>
+                <button onClick={() => handleAddSubject(false)} className="flex-[1.2] py-4 font-bold text-white bg-slate-800 hover:bg-slate-900 rounded-2xl shadow-lg transition-all active:scale-95">
+                  Xong!
+                </button>
               </div>
             </div>
           </div>
@@ -498,7 +562,7 @@ export default function App() {
 
         {/* MODAL NẠP NHANH MÔN HỌC */}
         {showBulkAddModal && (
-          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
             <div className="bg-white rounded-[32px] p-6 max-w-md w-full shadow-2xl animate-[fadeIn_0.2s_ease-out]">
               <h3 className="text-xl font-black mb-4 flex items-center gap-2 text-slate-800">⚡ Nạp nhanh danh sách</h3>
               <div className="space-y-2 mb-6 max-h-[350px] overflow-y-auto pr-2 custom-scroll">
@@ -516,26 +580,26 @@ export default function App() {
               </div>
               <div className="flex gap-3">
                 <button onClick={() => setShowBulkAddModal(false)} className="flex-1 py-3.5 font-bold text-slate-500 bg-slate-100 rounded-2xl active:scale-95 transition-all hover:bg-slate-200">Đóng</button>
-                <button onClick={() => handleBulkAdd(defaultSuggestions)} className="flex-[2] py-3.5 font-bold text-white bg-blue-600 rounded-2xl shadow-lg shadow-blue-200 active:scale-95 transition-all hover:bg-blue-700">+ THÊM TẤT CẢ VÀO DANH SÁCH</button>
+                <button onClick={() => handleBulkAdd(defaultSuggestions)} className="flex-[2] py-3.5 font-bold text-white bg-blue-600 rounded-2xl shadow-lg shadow-blue-200/50 active:scale-95 transition-all hover:bg-blue-700">+ THÊM TẤT CẢ</button>
               </div>
             </div>
           </div>
         )}
 
-        {/* MODAL XÓA LẺ & HÀNG LOẠT */}
+        {/* MODAL XÓA LẺ & HÀNG LOẠT DÙNG CHUNG UI */}
         {(subjectToDelete || showBulkDeleteModal) && (() => {
            const isBulk = showBulkDeleteModal;
            const count = isBulk ? selectedIds.length : 1;
            const name = isBulk ? `${count} môn học` : `môn "${subjectToDelete?.name}"`;
            
            return (
-            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
               <div className="bg-white rounded-[32px] p-8 max-w-sm w-full shadow-2xl animate-[fadeIn_0.2s_ease-out]">
                 <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
                   <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                 </div>
                 <h3 className="text-xl font-black text-center mb-2 text-slate-800">Xóa {name}?</h3>
-                <p className="text-center text-slate-500 text-[13px] font-bold mb-8">Ly có chắc chắn không? Toàn bộ điểm số của các môn đã chọn sẽ biến mất vĩnh viễn đó nha em iu.</p>
+                <p className="text-center text-slate-500 text-[13px] font-bold mb-8">Ly có chắc chắn không? Toàn bộ điểm số đã nhập sẽ biến mất vĩnh viễn đó nha.</p>
                 <div className="flex gap-4">
                   <button onClick={() => { setSubjectToDelete(null); setShowBulkDeleteModal(false); }} className="flex-1 py-3.5 font-bold text-slate-500 bg-slate-100 rounded-2xl active:scale-95 transition-all hover:bg-slate-200">Hủy</button>
                   <button onClick={isBulk ? handleBulkDelete : confirmDelete} className="flex-1 py-3.5 font-bold text-white bg-red-500 rounded-2xl shadow-lg shadow-red-200/50 active:scale-95 transition-all hover:bg-red-600">Xóa sạch!</button>
